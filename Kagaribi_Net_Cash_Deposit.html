@@ -1,0 +1,3498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="docTitle">Daily Sales Report System</title>
+<style>
+:root {
+  --bg: #f0f4ff;
+  --white: #ffffff;
+  --am: #ff7043;
+  --am-light: #fff3ef;
+  --am-mid: #ffe0d6;
+  --pm: #5c6bc0;
+  --pm-light: #eff0ff;
+  --pm-mid: #d9dcf8;
+  --green: #26a69a;
+  --green-light: #e0f5f3;
+  --red: #ef5350;
+  --red-light: #ffeaea;
+  --yellow: #ffc107;
+  --yellow-light: #fff8e1;
+  --text: #1a1f36;
+  --text-mid: #4a5568;
+  --text-light: #8898aa;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(92,107,192,0.10);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.07);
+  --radius: 18px;
+  --radius-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:Arial, sans-serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 10% 15%, rgba(255,112,67,0.09) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(92,107,192,0.10) 0%, transparent 45%);
+}
+
+/* Header */
+header {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  padding: 0 36px;
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 200;
+}
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-icon {
+  width:42px; height:42px;
+  background: linear-gradient(135deg, var(--am), #ff9800);
+  border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px; box-shadow:0 4px 12px rgba(255,112,67,0.35);
+}
+.brand h1 { font-family:Arial, sans-serif; font-size:19px; font-weight:800; }
+.brand p { font-size:11px; color:var(--text-light); font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.live-date {
+  background:var(--bg); border:1.5px solid var(--border); border-radius:8px;
+  padding:6px 14px; font-size:13px; font-weight:700; color:var(--pm);
+}
+.admin-btn {
+  background:linear-gradient(135deg,var(--pm),#7986cb); color:#fff; border:none;
+  padding:8px 18px; border-radius:8px; font-family:Arial, sans-serif;
+  font-size:13px; font-weight:800; cursor:pointer; letter-spacing:0.4px;
+  transition:all 0.2s; box-shadow:0 3px 10px rgba(92,107,192,0.3);
+}
+.admin-btn:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(92,107,192,0.4); }
+
+/* Main */
+main { max-width:1100px; margin:0 auto; padding:32px 24px 80px; }
+
+/* Stats */
+.stats-row { display:grid; grid-template-columns:repeat(7,1fr); gap:16px; margin-bottom:32px; }
+.stat-card {
+  background:var(--white); border-radius:var(--radius-sm); padding:18px 20px;
+  box-shadow:var(--shadow-sm); border-top:4px solid transparent; transition:transform 0.2s;
+}
+.stat-card:hover { transform:translateY(-2px); }
+.stat-card.s1 { border-top-color:var(--am); }
+.stat-card.s2 { border-top-color:var(--pm); }
+.stat-card.s3 { border-top-color:var(--green); }
+.stat-card.s4 { border-top-color:var(--yellow); }
+.stat-card.s5 { border-top-color:var(--red); }
+.stat-card.s6 { border-top-color:var(--green); }
+.stat-card.s7 { border-top-color:#1e88e5; }
+.s7 .stat-value { color:#1565c0; }
+.stat-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); margin-bottom:6px; }
+.stat-value { font-family:Arial, sans-serif; font-size:22px; font-weight:800; }
+.s1 .stat-value { color:var(--am); }
+.s2 .stat-value { color:var(--pm); }
+.s3 .stat-value { color:var(--green); }
+.s4 .stat-value { color:var(--text); }
+
+/* Section title */
+.sec-title {
+  font-family:Arial, sans-serif; font-size:18px; font-weight:800;
+  margin-bottom:16px; display:flex; align-items:center; gap:8px; color:var(--text);
+}
+.sec-dot { width:8px; height:8px; border-radius:50%; background:var(--pm); display:inline-block; }
+
+/* Form card */
+.form-card {
+  background:var(--white); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:28px 32px; margin-bottom:32px;
+}
+.date-bar {
+  display:flex; align-items:center; gap:14px;
+  margin-bottom:22px; padding-bottom:20px; border-bottom:2px dashed var(--border);
+}
+.date-bar label { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-mid); white-space:nowrap; }
+.date-bar input[type="date"] {
+  border:2px solid var(--border); border-radius:8px; padding:9px 14px;
+  font-family:Arial, sans-serif; font-size:14px; font-weight:700; color:var(--text);
+  background:var(--bg); outline:none; transition:all 0.2s;
+}
+.date-bar input[type="date"]:focus { border-color:var(--pm); box-shadow:0 0 0 3px rgba(92,107,192,0.12); }
+
+/* Panels */
+.panels { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
+@media(max-width:740px){ .panels{ grid-template-columns:1fr; } }
+.panel { border-radius:var(--radius-sm); overflow:hidden; border:2px solid var(--border); transition:box-shadow 0.2s; }
+.panel:hover { box-shadow:var(--shadow); }
+.panel-head { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+.panel-am .panel-head { background:linear-gradient(135deg,#ff7043,#ff9800); }
+.panel-pm .panel-head { background:linear-gradient(135deg,#5c6bc0,#7986cb); }
+.panel-head h3 { color:#fff; font-size:15px; font-weight:800; }
+.shift-pill { background:rgba(255,255,255,0.25); color:#fff; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; letter-spacing:1px; text-transform:uppercase; }
+.panel-body { padding:18px 20px; background:var(--white); }
+
+.frow { display:grid; grid-template-columns:110px 1fr; align-items:center; margin-bottom:10px; gap:8px; }
+.frow label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-mid); }
+.frow input, .frow select {
+  border:2px solid var(--border); border-radius:8px; padding:8px 12px;
+  font-family:Arial, sans-serif; font-size:14px; font-weight:600; color:var(--text);
+  background:var(--bg); outline:none; transition:all 0.2s; width:100%;
+}
+.frow input:focus, .frow select:focus { border-color:var(--pm); background:#fff; box-shadow:0 0 0 3px rgba(92,107,192,0.10); }
+.panel-am .frow input:focus, .panel-am .frow select:focus { border-color:var(--am); box-shadow:0 0 0 3px rgba(255,112,67,0.10); }
+.frow input[readonly] { background:var(--yellow-light); border-color:#ffd54f; color:#b8860b; font-weight:700; cursor:default; }
+
+.total-box {
+  background:linear-gradient(135deg,#fffbea,#fff8e1); border:2px solid var(--yellow);
+  border-radius:var(--radius-sm); padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between; margin:14px 0;
+}
+.total-box .tl { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:#b8860b; }
+.total-box .tv { font-family:Arial, sans-serif; font-size:18px; font-weight:800; color:#e65100; }
+.panel-pm .total-box .tv { color:var(--pm); }
+.divider { height:1px; background:var(--border); margin:12px 0; }
+
+
+.expense-panel {
+  border:2px solid var(--border); border-radius:var(--radius-sm); padding:18px 20px;
+  background:linear-gradient(135deg,#fff,#fff8f8); margin-bottom:18px;
+}
+.expense-panel h3 { font-size:15px; font-weight:900; margin-bottom:12px; color:var(--text); }
+.expense-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 18px; }
+.expense-summary { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:8px; }
+.expense-summary .total-box { margin:0; }
+.expense-summary .net-box { background:linear-gradient(135deg,#e8f5e9,#f1fff4); border-color:var(--green); }
+.expense-summary .net-box .tv { color:var(--green); }
+.expense-summary .ncd-box { background:linear-gradient(135deg,#e3f2fd,#f0f8ff); border-color:#1e88e5; }
+.expense-summary .ncd-box .tv { color:#1565c0; }
+.expense-summary .ncd-box .tl { color:#1565c0; }
+@media(max-width:740px){ .expense-grid,.expense-summary{ grid-template-columns:1fr; } }
+/* Cashier row */
+.crow { display:grid; grid-template-columns:110px 1fr; align-items:center; gap:8px; margin-top:12px; }
+.crow label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-mid); }
+.crow select {
+  border:2px solid var(--border); border-radius:8px; padding:8px 12px;
+  font-family:Arial, sans-serif; font-size:14px; font-weight:700; color:var(--text);
+  background:var(--bg); outline:none; transition:all 0.2s; width:100%;
+}
+
+/* Action buttons */
+.form-actions { display:flex; gap:12px; justify-content:flex-end; padding-top:4px; }
+.btn {
+  font-family:Arial, sans-serif; font-size:14px; font-weight:800; padding:11px 28px;
+  border-radius:10px; border:none; cursor:pointer; transition:all 0.2s;
+  display:flex; align-items:center; gap:7px;
+}
+.btn-clear { background:var(--red-light); color:var(--red); border:2px solid rgba(239,83,80,0.25); }
+.btn-clear:hover { background:#ffcdd2; transform:translateY(-1px); }
+.btn-submit { background:linear-gradient(135deg,var(--green),#00897b); color:#fff; box-shadow:0 4px 14px rgba(38,166,154,0.35); }
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(38,166,154,0.45); }
+
+/* History */
+.history-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+.history-head {
+  padding:20px 28px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--border); background:linear-gradient(135deg,#f8faff,#f0f4ff);
+}
+.history-head h2 { font-family:Arial, sans-serif; font-size:17px; font-weight:800; }
+.history-head p { font-size:12px; color:var(--text-light); font-weight:600; margin-top:2px; }
+.btn-export {
+  background:var(--pm-light); color:var(--pm); border:2px solid var(--pm-mid);
+  font-family:Arial, sans-serif; font-size:12px; font-weight:800; padding:7px 16px;
+  border-radius:8px; cursor:pointer; transition:all 0.2s;
+}
+.btn-export:hover { background:var(--pm-mid); }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead { background:var(--bg); }
+th { padding:11px 13px; text-align:left; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); white-space:nowrap; }
+td { padding:12px 13px; border-bottom:1px solid var(--border); color:var(--text-mid); font-weight:600; vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:#fafbff; }
+.td-date { font-weight:800; color:var(--text); }
+.td-am { color:var(--am); font-weight:800; }
+.td-pm { color:var(--pm); font-weight:800; }
+.td-grand { color:var(--green); font-weight:900; font-size:14px; }
+.ctag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:800; }
+.ctag.am { background:var(--am-light); color:var(--am); }
+.ctag.pm { background:var(--pm-light); color:var(--pm); }
+.row-btns { display:flex; gap:6px; }
+.btn-edit, .btn-del, .btn-save, .btn-cancel {
+  border:none; border-radius:7px; padding:5px 11px;
+  font-family:Arial, sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.15s;
+}
+.btn-edit { background:var(--pm-light); color:var(--pm); }
+.btn-edit:hover { background:var(--pm-mid); }
+.btn-del { background:var(--red-light); color:var(--red); }
+.btn-del:hover { background:#ffcdd2; }
+.btn-save { background:var(--green-light); color:var(--green); }
+.btn-save:hover { background:#b2dfdb; }
+.btn-cancel { background:var(--bg); color:var(--text-light); border:1.5px solid var(--border); }
+.ei {
+  border:1.5px solid var(--pm-mid); border-radius:6px; padding:4px 8px;
+  font-family:Arial, sans-serif; font-size:12px; font-weight:600; color:var(--text);
+  background:#fff; width:80px; outline:none;
+}
+.ei:focus { border-color:var(--pm); }
+.es {
+  border:1.5px solid var(--pm-mid); border-radius:6px; padding:4px 6px;
+  font-family:Arial, sans-serif; font-size:12px; font-weight:600; color:var(--text);
+  background:#fff; outline:none;
+}
+.empty-state { padding:56px 24px; text-align:center; color:var(--text-light); }
+.empty-state .eico { font-size:44px; margin-bottom:12px; }
+.empty-state p { font-size:14px; font-weight:700; }
+.empty-state small { font-size:12px; }
+
+/* Modals */
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(26,31,54,0.45); backdrop-filter:blur(4px);
+  z-index:500; align-items:center; justify-content:center;
+}
+.overlay.open { display:flex; }
+.modal {
+  background:var(--white); border-radius:var(--radius); padding:32px; width:360px;
+  box-shadow:0 20px 60px rgba(26,31,54,0.25);
+  animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+.modal h2 { font-family:Arial, sans-serif; font-size:20px; font-weight:800; margin-bottom:6px; }
+.modal p { font-size:13px; color:var(--text-light); font-weight:600; margin-bottom:22px; }
+.mf { margin-bottom:16px; }
+.mf label { display:block; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-mid); margin-bottom:6px; }
+.mf input, .mf textarea {
+  width:100%; border:2px solid var(--border); border-radius:8px; padding:10px 14px;
+  font-family:Arial, sans-serif; font-size:14px; font-weight:600; color:var(--text);
+  background:var(--bg); outline:none; transition:all 0.2s;
+}
+.mf input:focus, .mf textarea:focus { border-color:var(--pm); background:#fff; box-shadow:0 0 0 3px rgba(92,107,192,0.1); }
+.mf textarea { resize:vertical; }
+.m-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+.btn-mc { background:var(--bg); color:var(--text-mid); border:2px solid var(--border); font-family:Arial, sans-serif; font-size:13px; font-weight:800; padding:9px 20px; border-radius:8px; cursor:pointer; }
+.btn-mo { background:linear-gradient(135deg,var(--pm),#7986cb); color:#fff; border:none; font-family:Arial, sans-serif; font-size:13px; font-weight:800; padding:9px 20px; border-radius:8px; cursor:pointer; box-shadow:0 3px 10px rgba(92,107,192,0.3); transition:all 0.2s; }
+.btn-mo:hover { transform:translateY(-1px); }
+
+/* Daily Totals Summary */
+.daily-summary-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:32px; }
+.daily-summary-head {
+  padding:20px 28px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:2px solid var(--border); background:linear-gradient(135deg,#f0f4ff,#e8f5e9);
+}
+.daily-summary-head h2 { font-family:Arial,sans-serif; font-size:17px; font-weight:800; }
+.daily-summary-head p { font-size:12px; color:var(--text-light); font-weight:600; margin-top:2px; }
+.ds-table { width:100%; border-collapse:collapse; font-size:13px; }
+.ds-table thead { background:#f8faff; }
+.ds-table th { padding:11px 14px; text-align:left; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); white-space:nowrap; border-bottom:2px solid var(--border); }
+.ds-table td { padding:12px 14px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text-mid); }
+.ds-table tr:last-child td { border-bottom:none; }
+.ds-table tr:hover td { background:#fafbff; }
+.ds-table .ds-date { font-weight:800; color:var(--text); }
+.ds-table .ds-gcash { color:#7b1fa2; font-weight:800; }
+.ds-table .ds-card  { color:var(--pm); font-weight:800; }
+.ds-table .ds-store { color:var(--red); font-weight:700; }
+.ds-table .ds-kai   { color:#e65100; font-weight:700; }
+.ds-table .ds-ncd   { color:#1565c0; font-weight:900; font-size:14px; }
+.ds-table tfoot tr td { background:linear-gradient(135deg,#f0f4ff,#e8f5e9); font-weight:900; border-top:2px solid var(--border); padding:13px 14px; }
+.ds-table tfoot .ds-date { font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text); }
+.ds-table tfoot .ds-gcash { color:#7b1fa2; }
+.ds-table tfoot .ds-card  { color:var(--pm); }
+.ds-table tfoot .ds-store { color:var(--red); }
+.ds-table tfoot .ds-kai   { color:#e65100; }
+.ds-table tfoot .ds-ncd   { color:#1565c0; font-size:15px; }
+.ds-tag { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:800; background:var(--pm-light); color:var(--pm); }
+
+/* Data Shield Banner */
+.data-shield {
+  background:linear-gradient(135deg,#e8f5e9,#f0fff4);
+  border:2px solid #a5d6a7; border-radius:var(--radius-sm);
+  padding:14px 22px; margin-bottom:28px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+}
+.data-shield-left { display:flex; align-items:center; gap:14px; }
+.shield-icon { font-size:26px; line-height:1; }
+.shield-info h4 { font-size:13px; font-weight:900; color:#1b5e20; margin-bottom:2px; }
+.shield-info p  { font-size:11px; color:#388e3c; font-weight:600; }
+.shield-stats { display:flex; gap:18px; flex-wrap:wrap; }
+.shield-stat { text-align:center; }
+.shield-stat .sv { font-size:18px; font-weight:900; color:#1b5e20; line-height:1.1; }
+.shield-stat .sl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#388e3c; }
+.shield-actions { display:flex; gap:8px; }
+.btn-backup {
+  background:linear-gradient(135deg,#1b5e20,#388e3c); color:#fff; border:none;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:800;
+  padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 8px rgba(27,94,32,0.3);
+}
+.btn-backup:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(27,94,32,0.4); }
+.btn-restore {
+  background:#fff; color:#1b5e20; border:2px solid #a5d6a7;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:800;
+  padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+}
+.btn-restore:hover { background:#e8f5e9; }
+
+/* Backup Modal */
+.backup-modal { width:480px; max-height:88vh; overflow:auto; }
+.backup-stat-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0; }
+.bstat { background:var(--bg); border-radius:10px; padding:14px; text-align:center; border:2px solid var(--border); }
+.bstat .bsv { font-size:22px; font-weight:900; color:var(--pm); }
+.bstat .bsl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-light); margin-top:3px; }
+.restore-zone {
+  border:2px dashed var(--border); border-radius:10px; padding:28px;
+  text-align:center; cursor:pointer; transition:all 0.2s; margin:16px 0;
+  background:var(--bg);
+}
+.restore-zone:hover, .restore-zone.drag { border-color:var(--pm); background:var(--pm-light); }
+.restore-zone input { display:none; }
+.restore-zone p { font-size:13px; font-weight:700; color:var(--text-mid); margin-top:8px; }
+.restore-zone small { font-size:11px; color:var(--text-light); }
+.restore-preview { background:var(--green-light); border:2px solid var(--green); border-radius:10px; padding:14px 18px; margin-top:12px; display:none; }
+.restore-preview h4 { font-size:13px; font-weight:800; color:#1b5e20; margin-bottom:6px; }
+.restore-preview p  { font-size:12px; color:#388e3c; font-weight:600; }
+.restore-warn { background:var(--yellow-light); border:2px solid var(--yellow); border-radius:8px; padding:10px 14px; font-size:12px; font-weight:700; color:#795700; margin-top:10px; }
+
+/* Toast */
+#toast {
+  position:fixed; bottom:28px; right:28px;
+  background:var(--white); border-radius:12px; padding:14px 22px;
+  display:flex; align-items:center; gap:10px;
+  font-size:14px; font-weight:700; color:var(--text);
+  box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  transform:translateY(80px); opacity:0;
+  transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:999; pointer-events:none; border-left:4px solid var(--green);
+}
+#toast.show { transform:translateY(0); opacity:1; }
+#toast.warn { border-left-color:var(--yellow); }
+#toast.err  { border-left-color:var(--red); }
+
+@media(max-width:900px){ .stats-row{ grid-template-columns:1fr 1fr; } }
+@media(max-width:500px){ header{ padding:0 16px; } main{ padding:20px 12px 60px; } .form-card{ padding:18px 14px; } }
+
+/* Performance & smoothness */
+.table-wrap { will-change: transform; }
+table { table-layout: fixed; }
+td, th { overflow: hidden; text-overflow: ellipsis; }
+.history-card, .daily-summary-card { contain: layout style; }
+.stat-card { will-change: transform; }
+.form-card { contain: layout style; }
+input, select { transition: border-color 0.15s, box-shadow 0.15s; }
+.btn, .btn-edit, .btn-del, .btn-save, .btn-cancel, .btn-export, .btn-backup, .btn-restore { transition: all 0.15s ease; }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--border);
+  background: var(--bg); font-size: 12px; font-weight: 700; color: var(--text-mid);
+}
+.pagination-btns { display: flex; gap: 6px; }
+.pg-btn {
+  border: 1.5px solid var(--border); background: var(--white); color: var(--text-mid);
+  border-radius: 7px; padding: 5px 13px; font-family: Arial, sans-serif;
+  font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+.pg-btn:hover:not(:disabled) { background: var(--pm-light); color: var(--pm); border-color: var(--pm-mid); }
+.pg-btn:disabled { opacity: 0.35; cursor: default; }
+.pg-btn.active { background: var(--pm); color: #fff; border-color: var(--pm); }
+.pg-info { color: var(--text-light); }
+
+/* Skeleton loader */
+@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+.skeleton-row td { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:800px 100%; animation:shimmer 1.2s infinite; border-radius:4px; color:transparent; }
+
+
+/* Admin-actions column */
+.admin-locked-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; font-weight:800; color:#888; letter-spacing:0.5px;
+  background:var(--bg); border:1.5px solid var(--border);
+  border-radius:20px; padding:2px 8px; white-space:nowrap;
+}
+.btn-del-date {
+  background:#fff3e0; color:#e65100; border:1.5px solid #ffcc80;
+  border-radius:7px; padding:4px 10px;
+  font-family:Arial,sans-serif; font-size:11px; font-weight:800; cursor:pointer; transition:all 0.15s;
+  white-space:nowrap;
+}
+.btn-del-date:hover { background:#ffe0b2; }
+.btn-del-tx {
+  background:var(--red-light); color:var(--red); border:1.5px solid rgba(239,83,80,0.3);
+  border-radius:7px; padding:4px 10px;
+  font-family:Arial,sans-serif; font-size:11px; font-weight:800; cursor:pointer; transition:all 0.15s;
+  white-space:nowrap;
+}
+.btn-del-tx:hover { background:#ffcdd2; }
+.btn-clear-all {
+  background:var(--red-light); color:var(--red); border:2px solid rgba(239,83,80,0.3);
+  font-family:Arial,sans-serif; font-size:12px; font-weight:800; padding:7px 14px;
+  border-radius:8px; cursor:pointer; transition:all 0.2s; margin-left:8px;
+}
+.btn-clear-all:hover { background:#ffcdd2; }
+.btn-clear-history {
+  background:linear-gradient(135deg,#b71c1c,#e53935); color:#fff;
+  border:none; font-family:Arial,sans-serif; font-size:12px; font-weight:800;
+  padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 10px rgba(183,28,28,0.35); margin-left:8px; white-space:nowrap;
+}
+.btn-clear-history:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(183,28,28,0.45); background:linear-gradient(135deg,#c62828,#f44336); }
+.btn-clear-history:active { transform:translateY(0); }
+.ds-table th.ds-act, .ds-table td.ds-act { text-align:center; }
+
+/* ── Cloud Sync Banner ── */
+.cloud-banner {
+  background: linear-gradient(135deg,#e3f2fd,#f0f8ff);
+  border: 2px solid #90caf9; border-radius: var(--radius-sm);
+  padding: 12px 20px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+.cloud-banner-left { display:flex; align-items:center; gap:10px; }
+.cloud-icon { font-size:24px; line-height:1; }
+.cloud-info h4 { font-size:13px; font-weight:900; color:#0d47a1; margin-bottom:1px; }
+.cloud-info p  { font-size:11px; color:#1565c0; font-weight:600; }
+.cloud-status { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; }
+.cloud-dot { width:8px; height:8px; border-radius:50%; background:#ccc; display:inline-block; transition:background 0.4s; }
+.cloud-dot.synced  { background:#26a69a; box-shadow:0 0 0 3px rgba(38,166,154,0.2); }
+.cloud-dot.syncing { background:#ffc107; animation:pulse 1s infinite; }
+.cloud-dot.error   { background:#ef5350; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.btn-sync {
+  background:linear-gradient(135deg,#1565c0,#1e88e5); color:#fff; border:none;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:800;
+  padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 8px rgba(21,101,192,0.3);
+}
+.btn-sync:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(21,101,192,0.4); }
+.btn-sync:disabled { opacity:0.6; cursor:default; transform:none; }
+
+/* ── Nav Tabs ── */
+.main-tabs {
+  display:flex; gap:0; margin-bottom:24px;
+  background:var(--white); border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-sm); overflow:hidden; border:2px solid var(--border);
+}
+.tab-btn {
+  flex:1; padding:13px 10px; border:none; background:transparent;
+  font-family:Arial,sans-serif; font-size:13px; font-weight:800; cursor:pointer;
+  color:var(--text-light); transition:all 0.2s; position:relative;
+  border-right:1px solid var(--border);
+}
+.tab-btn:last-child { border-right:none; }
+.tab-btn:hover { background:var(--bg); color:var(--text); }
+.tab-btn.active { background:linear-gradient(135deg,var(--pm),#7986cb); color:#fff; }
+.tab-btn .tab-badge {
+  display:inline-block; background:rgba(255,255,255,0.3); color:#fff;
+  font-size:9px; font-weight:900; padding:1px 6px; border-radius:20px;
+  margin-left:5px; vertical-align:middle;
+}
+.tab-btn:not(.active) .tab-badge { background:var(--pm-light); color:var(--pm); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── Waitress Summary ── */
+.waitress-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:28px; }
+.waitress-head {
+  padding:20px 28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  border-bottom:2px solid var(--border); background:linear-gradient(135deg,#fff3ef,#ffe0d6);
+}
+.waitress-head h2 { font-family:Arial,sans-serif; font-size:17px; font-weight:800; color:var(--am); }
+.waitress-head p  { font-size:12px; color:#bf360c; font-weight:600; margin-top:2px; }
+.waitress-filters {
+  display:flex; align-items:center; gap:12px; padding:14px 22px;
+  border-bottom:1px solid var(--border); background:var(--bg); flex-wrap:wrap;
+}
+.waitress-filters label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-mid); }
+.waitress-filters select, .waitress-filters input[type="date"] {
+  border:2px solid var(--border); border-radius:8px; padding:7px 12px;
+  font-family:Arial,sans-serif; font-size:13px; font-weight:600; color:var(--text);
+  background:#fff; outline:none; transition:all 0.2s;
+}
+.waitress-filters select:focus, .waitress-filters input:focus { border-color:var(--am); }
+.w-stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:16px 22px; border-bottom:1px solid var(--border); }
+@media(max-width:700px){ .w-stat-row{ grid-template-columns:1fr 1fr; } }
+.w-stat { background:var(--bg); border-radius:var(--radius-sm); padding:14px 16px; border-left:4px solid var(--am); }
+.w-stat .wsl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-light); margin-bottom:4px; }
+.w-stat .wsv { font-size:20px; font-weight:900; color:var(--am); }
+.w-table-wrap { overflow-x:auto; }
+.w-table { width:100%; border-collapse:collapse; font-size:13px; }
+.w-table thead { background:var(--bg); }
+.w-table th { padding:10px 14px; text-align:left; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-light); white-space:nowrap; border-bottom:2px solid var(--border); }
+.w-table td { padding:11px 14px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text-mid); }
+.w-table tr:hover td { background:#fff5f0; }
+.w-table tr:last-child td { border-bottom:none; }
+.w-note-input {
+  border:1.5px solid var(--border); border-radius:6px; padding:5px 9px;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:600; color:var(--text);
+  background:#fff; outline:none; width:100%; transition:all 0.2s; min-width:120px;
+}
+.w-note-input:focus { border-color:var(--am); box-shadow:0 0 0 3px rgba(255,112,67,0.1); }
+.btn-w-save {
+  background:var(--am-light); color:var(--am); border:1.5px solid rgba(255,112,67,0.3);
+  border-radius:7px; padding:4px 12px; font-family:Arial,sans-serif;
+  font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all 0.15s;
+}
+.btn-w-save:hover { background:var(--am-mid); }
+.shift-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:800; }
+.shift-badge.am { background:var(--am-light); color:var(--am); }
+.shift-badge.pm { background:var(--pm-light); color:var(--pm); }
+.w-empty { padding:48px 24px; text-align:center; color:var(--text-light); }
+.w-empty .eico { font-size:40px; margin-bottom:10px; }
+.w-empty p { font-size:14px; font-weight:700; }
+.w-empty small { font-size:12px; }
+
+/* ══════════════════════════════════════════
+   SUMMARY OF SALES REPORT — spreadsheet style
+   ══════════════════════════════════════════ */
+.ssr-wrapper {
+  background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow);
+  overflow:hidden; margin-bottom:28px;
+}
+.ssr-topbar {
+  padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  border-bottom:2px solid var(--border); background:linear-gradient(135deg,#e8eaf6,#f3f0ff);
+}
+.ssr-topbar h2 { font-family:Arial,sans-serif; font-size:17px; font-weight:900; color:#283593; }
+.ssr-topbar p  { font-size:12px; color:#3949ab; font-weight:600; margin-top:2px; }
+.ssr-date-bar  { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 24px; background:#f8f9ff; border-bottom:1px solid var(--border); }
+.ssr-date-bar label { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-mid); }
+.ssr-date-input { border:2px solid var(--border); border-radius:8px; padding:6px 12px; font-family:Arial,sans-serif; font-size:13px; font-weight:700; color:var(--text); background:#fff; outline:none; cursor:pointer; }
+.ssr-date-input:focus { border-color:#3949ab; }
+.ssr-body { padding:18px 20px 20px; overflow-x:auto; }
+.ssr-tbl { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; font-size:13px; border:2px solid #1a237e; }
+.ssr-tbl td, .ssr-tbl th { border:1px solid #9fa8da; padding:7px 10px; white-space:nowrap; }
+.ssr-tbl .ssr-header td { background:#1a237e; color:#fff; font-weight:900; font-size:13px; text-align:center; border-color:#283593; letter-spacing:0.3px; }
+.ssr-tbl .ssr-section td { background:#1565c0; color:#fff; font-weight:900; font-size:12px; text-align:center; letter-spacing:1px; border-color:#1976d2; }
+.ssr-tbl .ssr-sum td { background:#fff9c4; }
+.ssr-tbl .ssr-total-row td { background:#fff176; font-weight:900; }
+.ssr-tbl .ssr-pay td { background:#e3f2fd; }
+.ssr-tbl .ssr-pay-total td { background:#bbdefb; font-weight:900; }
+.ssr-tbl .ssr-footer td { background:#e8f5e9; }
+.ssr-brand-cell { background:linear-gradient(135deg,#1a237e,#283593) !important; color:#fff !important; font-weight:900 !important; font-size:16px !important; text-align:center !important; letter-spacing:0.5px; vertical-align:middle; }
+.ssr-lbl  { font-weight:800; color:#1a237e; }
+.ssr-lbl2 { font-weight:700; color:#283593; font-size:12px; }
+.ssr-val  { text-align:right; font-weight:800; font-variant-numeric:tabular-nums; color:var(--text); }
+.ssr-val-am   { color:var(--am) !important; font-weight:900 !important; text-align:right; }
+.ssr-val-pm   { color:var(--pm) !important; font-weight:900 !important; text-align:right; }
+.ssr-val-sc   { color:#c2185b !important; font-weight:800 !important; text-align:right; }
+.ssr-val-exp  { color:var(--red) !important; font-weight:800 !important; text-align:right; }
+.ssr-val-ncd  { color:#1565c0 !important; font-weight:900 !important; font-size:15px !important; text-align:right; }
+.ssr-val-gross{ color:var(--green) !important; font-weight:900 !important; font-size:14px !important; text-align:right; }
+.ssr-val-avg  { color:#6a1b9a !important; font-weight:800 !important; text-align:right; }
+.ssr-meta-lbl { font-weight:900; background:#fff9c4 !important; color:#1a237e; text-align:center; }
+.ssr-meta-val { font-weight:900; background:#fff !important; color:var(--text); text-align:center; }
+.btn-ssr-print { background:linear-gradient(135deg,#283593,#3949ab); color:#fff; border:none; font-family:Arial,sans-serif; font-size:12px; font-weight:800; padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s; box-shadow:0 3px 8px rgba(40,53,147,0.3); }
+.btn-ssr-print:hover { transform:translateY(-1px); }
+
+
+/* ── Expanded & Editable Daily Summary ── */
+.ds-table thead tr:first-child th { border-bottom:1px solid var(--border); padding:8px 10px; font-size:11px; }
+.ds-table thead tr:nth-child(2) th { padding:6px 10px; font-size:10px; }
+.ds-table td { padding:9px 10px; white-space:nowrap; }
+
+/* Inline-edit hover */
+.ds-edit-cell {
+  cursor:pointer; position:relative; transition:background 0.12s;
+}
+.ds-edit-cell:hover { background:#fffbf0 !important; }
+.ds-edit-cell:hover::after {
+  content:'✏️'; position:absolute; top:2px; right:3px;
+  font-size:9px; opacity:0.55; pointer-events:none; line-height:1;
+}
+/* Active editing input */
+.ds-cell-input {
+  border:2px solid var(--pm); border-radius:6px; padding:4px 7px;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:700; color:var(--text);
+  background:#fff; outline:none; width:86px;
+  box-shadow:0 0 0 3px rgba(92,107,192,0.15);
+}
+.ds-cell-input:focus { border-color:var(--am); box-shadow:0 0 0 3px rgba(255,112,67,0.15); }
+/* Row in edit mode */
+.ds-editing td { background:#fffdf0 !important; }
+/* Save / Cancel */
+.ds-row-actions { display:flex; gap:5px; align-items:center; justify-content:center; }
+.btn-ds-save {
+  background:var(--green-light); color:var(--green);
+  border:1.5px solid rgba(38,166,154,0.3); border-radius:6px;
+  padding:4px 11px; font-family:Arial,sans-serif; font-size:11px; font-weight:800;
+  cursor:pointer; white-space:nowrap; transition:all 0.15s;
+}
+.btn-ds-save:hover { background:#b2dfdb; }
+.btn-ds-cancel {
+  background:var(--bg); color:var(--text-light); border:1.5px solid var(--border);
+  border-radius:6px; padding:4px 9px; font-family:Arial,sans-serif;
+  font-size:11px; font-weight:800; cursor:pointer; transition:all 0.15s;
+}
+.btn-ds-cancel:hover { background:#eee; }
+.btn-ds-edit {
+  background:var(--pm-light); color:var(--pm); border:1.5px solid var(--pm-mid);
+  border-radius:6px; padding:4px 10px; font-family:Arial,sans-serif;
+  font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; transition:all 0.15s;
+}
+.btn-ds-edit:hover { background:var(--pm-mid); }
+/* Column colour tints */
+.ds-am-cash,.ds-am-card,.ds-am-gcash,.ds-am-total { background:rgba(255,112,67,0.03); }
+.ds-pm-cash,.ds-pm-card,.ds-pm-gcash,.ds-pm-total { background:rgba(92,107,192,0.03); }
+.ds-gross,.ds-net-sales { background:rgba(38,166,154,0.04); }
+.ds-am-sc,.ds-pm-sc,.ds-total-sc { background:rgba(194,24,91,0.04); }
+.ds-store-exp,.ds-kai-exp { background:rgba(239,83,80,0.04); }
+.ds-ncd { background:rgba(21,101,192,0.06); }
+/* Value colours */
+.ds-am-total { color:var(--am)!important; font-weight:900!important; }
+.ds-pm-total { color:var(--pm)!important; font-weight:900!important; }
+.ds-gross   { color:var(--green)!important; font-weight:900!important; font-size:14px!important; }
+.ds-net-sales { color:var(--green)!important; font-weight:800!important; }
+.ds-total-sc { color:#c2185b!important; font-weight:800!important; }
+.ds-store-exp { color:var(--red)!important; }
+.ds-kai-exp  { color:#e65100!important; }
+.ds-ncd     { color:#1565c0!important; font-weight:900!important; font-size:14px!important; }
+
+/* ═══════════════════════════════════════════════════
+   END OF DAY SALES REPORT  (EOD)
+   Matches the Kagaribi Carmona physical print layout
+   ═══════════════════════════════════════════════════ */
+.eod-wrapper {
+  background:var(--white); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden; margin-bottom:28px;
+}
+.eod-topbar {
+  padding:16px 24px; display:flex; align-items:center;
+  justify-content:space-between; flex-wrap:wrap; gap:12px;
+  border-bottom:2px solid var(--border);
+  background:linear-gradient(135deg,#e8f5e9,#f1f8e9);
+}
+.eod-topbar h2 { font-size:17px; font-weight:900; color:#1b5e20; }
+.eod-topbar p  { font-size:12px; color:#2e7d32; font-weight:600; margin-top:2px; }
+.eod-date-bar  {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:10px 24px; background:#f9fbe7; border-bottom:1px solid var(--border);
+}
+.eod-date-bar label { font-size:12px; font-weight:800; text-transform:uppercase;
+  letter-spacing:0.5px; color:var(--text-mid); }
+.eod-date-input {
+  border:2px solid var(--border); border-radius:8px; padding:6px 12px;
+  font-family:Arial,sans-serif; font-size:13px; font-weight:700;
+  color:var(--text); background:#fff; outline:none; cursor:pointer;
+}
+.eod-date-input:focus { border-color:#2e7d32; }
+.eod-body { padding:18px 20px 20px; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; }
+
+/* The print card itself */
+.eod-card {
+  background:#fff; border:2px solid #333;
+  font-family:Arial,sans-serif; font-size:13px; color:#000;
+  min-width:280px; max-width:340px; width:100%; flex-shrink:0;
+}
+/* Card header band */
+.eod-card-head {
+  background:#fff; border-bottom:2px solid #333;
+  padding:10px 14px 8px;
+}
+.eod-card-head .eod-store  { font-size:14px; font-weight:900; letter-spacing:0.3px; }
+.eod-card-head .eod-subtitle{ font-size:12px; font-weight:700; color:#333; margin:1px 0; }
+.eod-card-head .eod-daterow { font-size:12px; font-weight:600; color:#444; }
+
+/* Table inside card */
+.eod-tbl { width:100%; border-collapse:collapse; }
+.eod-tbl td { padding:4px 12px; font-size:13px; vertical-align:middle; }
+.eod-tbl .eod-label { font-weight:700; color:#000; white-space:nowrap; width:60%; }
+.eod-tbl .eod-value { font-weight:800; color:#000; text-align:right; white-space:nowrap; }
+.eod-tbl .eod-dash  { text-align:right; color:#555; font-weight:700; }
+
+/* Section dividers */
+.eod-tbl .eod-gap td  { padding:4px 0; background:#fff; border:none; }
+.eod-tbl .eod-line td { padding:0; border-top:1px solid #aaa; }
+.eod-tbl .eod-dline td{ padding:0; border-top:2px solid #333; }
+
+/* Highlighted rows */
+.eod-tbl .eod-gross td  { background:#fff9c4; }
+.eod-tbl .eod-net-row td{ background:#e8f5e9; }
+.eod-tbl .eod-ncd-row td{ background:#e3f2fd; }
+.eod-tbl .eod-ncd-row .eod-label { color:#1565c0; font-size:14px; }
+.eod-tbl .eod-ncd-row .eod-value { color:#1565c0; font-size:14px; font-weight:900; }
+.eod-tbl .eod-exp-row td{ background:#fff3ef; }
+.eod-tbl .eod-exp-row .eod-label { color:var(--red); font-weight:900; }
+.eod-tbl .eod-exp-row .eod-value { color:var(--red); font-weight:900; }
+.eod-tbl .eod-sc-row .eod-value  { color:#c2185b; font-weight:800; }
+
+/* Section sub-headers */
+.eod-tbl .eod-sub td {
+  background:#f5f5f5; font-size:11px; font-weight:900;
+  text-transform:uppercase; letter-spacing:0.8px; color:#555;
+  padding:5px 12px; border-top:1px solid #ddd; border-bottom:1px solid #ddd;
+}
+/* Guest + avg block */
+.eod-tbl .eod-guest-lbl td { font-weight:700; color:#000; padding:5px 12px 2px; }
+.eod-tbl .eod-avg-row  td  { padding:2px 12px 5px; }
+.eod-tbl .eod-avg-row .eod-value { color:#6a1b9a; font-size:13px; font-weight:900; }
+
+/* Live badge */
+.eod-live-badge {
+  display:inline-block; background:var(--am); color:#fff;
+  font-size:9px; font-weight:900; padding:2px 7px; border-radius:20px;
+  letter-spacing:0.5px; vertical-align:middle; margin-left:6px;
+  animation: eodPulse 1.2s ease-in-out infinite;
+}
+@keyframes eodPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+/* Print button for EOD */
+.btn-eod-print {
+  background:linear-gradient(135deg,#2e7d32,#388e3c); color:#fff; border:none;
+  font-family:Arial,sans-serif; font-size:12px; font-weight:800;
+  padding:8px 16px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 8px rgba(46,125,50,0.35);
+}
+.btn-eod-print:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(46,125,50,0.45); }
+
+@media print {
+  .eod-topbar, .eod-date-bar { display:none !important; }
+  .eod-wrapper { box-shadow:none !important; border-radius:0 !important; }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">KS</div>
+    <div>
+      <h1 id="brandTitle">SalesTrack</h1>
+      <p id="brandSubtitle">Daily Sales Report System</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-date" id="headerDate"></div>
+    <button class="admin-btn" id="adminButton" onclick="openAdmin()"> Admin</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Cloud Sync Banner -->
+  <!-- Cloud Sync Banner -->
+  <div class="cloud-banner" id="cloudBanner">
+    <div class="cloud-banner-left">
+      <div class="cloud-icon">☁️</div>
+      <div class="cloud-info">
+        <h4>Online Cloud Sync — Admin Daily Check</h4>
+        <p id="cloudStatusText">Not configured — click ⚙️ Setup to enable</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="cloud-status">
+        <span class="cloud-dot" id="cloudDot"></span>
+        <span id="cloudStatusLabel">Offline</span>
+      </div>
+      <button class="btn-sync" id="btnCloudSync" onclick="cloudPush()" disabled>⬆ Push</button>
+      <button class="btn-sync" style="background:linear-gradient(135deg,#388e3c,#43a047);" id="btnCloudPull" onclick="cloudPull()" disabled>⬇ Pull</button>
+      <button class="btn-sync" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);" onclick="openCloudSetup()">⚙️ Setup</button>
+    </div>
+  </div>
+
+  <!-- Cloud Setup Modal -->
+  <div id="cloudSetupModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:18px;padding:32px;max-width:480px;width:94%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="font-size:17px;font-weight:900;color:#1a237e;margin-bottom:6px;">☁️ Cloud Sync Setup</h3>
+      <p style="font-size:12px;color:#666;margin-bottom:18px;line-height:1.6;">
+        This system uses <strong>JSONBin.io</strong> — a free online JSON storage service — as the cloud backend.<br>
+        <strong>Steps:</strong><br>
+        1. Go to <a href="https://jsonbin.io" target="_blank" style="color:#1565c0;">jsonbin.io</a> → Sign up free<br>
+        2. Click <strong>+ Create Bin</strong> → paste <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">{}</code> as content → Save<br>
+        3. Copy the <strong>Bin ID</strong> (looks like: <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">64a1b2c3d4e5f6...</code>)<br>
+        4. Copy your <strong>Master Key</strong> from Account → API Keys<br>
+        5. Paste both below and click Save.
+      </p>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:800;color:#333;display:block;margin-bottom:4px;">JSONBin Bin ID</label>
+        <input id="cloudBinId" type="text" placeholder="e.g. 64a1b2c3d4e5f60123456789"
+          style="width:100%;border:2px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:monospace;outline:none;">
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="font-size:12px;font-weight:800;color:#333;display:block;margin-bottom:4px;">Master Key (API Key)</label>
+        <input id="cloudApiKey" type="password" placeholder="$2a$10$..."
+          style="width:100%;border:2px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:monospace;outline:none;">
+        <p style="font-size:11px;color:#999;margin-top:4px;">Stored locally in your browser only. Never shared.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="closeCloudSetup()" style="background:#f0f0f0;color:#555;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;">Cancel</button>
+        <button onclick="saveCloudSetup()" style="background:linear-gradient(135deg,#1565c0,#1e88e5);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:800;cursor:pointer;">💾 Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Tabs -->
+  <div class="main-tabs">
+    <button class="tab-btn active" id="tab-admin" onclick="switchTab('admin')">📊 Admin View</button>
+    <button class="tab-btn" id="tab-waitress" onclick="switchTab('waitress')">👩‍💼 Waitress Summary <span class="tab-badge" id="waitressBadge">0</span></button>
+  </div>
+
+  <!-- TAB: Admin View -->
+  <div class="tab-panel active" id="panel-admin">
+
+  <!-- Data Shield Banner -->
+  <div class="data-shield" id="dataShield">
+    <div class="data-shield-left">
+      <div class="shield-icon"></div>
+      <div class="shield-info">
+        <h4> Data Protection Active</h4>
+        <p id="shieldLastBackup">All records preserved in local storage · Backup recommended</p>
+      </div>
+    </div>
+    <div class="shield-stats">
+      <div class="shield-stat"><div class="sv" id="shieldRecords">0</div><div class="sl">Reports</div></div>
+      <div class="shield-stat"><div class="sv" id="shieldTx">0</div><div class="sl">Transactions</div></div>
+      <div class="shield-stat"><div class="sv" id="shieldDays">0</div><div class="sl">Days Logged</div></div>
+    </div>
+    <div class="shield-actions">
+      <button class="btn-restore" onclick="openRestoreModal()"> Restore</button>
+      <button class="btn-backup" onclick="backupData()"> Backup All Data</button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       SUMMARY OF SALES REPORT — matches physical spreadsheet
+       ═══════════════════════════════════════════════════════ -->
+  <div class="sec-title"><span class="sec-dot" style="background:#283593"></span> Summary of Sales Report</div>
+  <div class="ssr-wrapper">
+    <div class="ssr-topbar">
+      <div>
+        <h2>📋 Summary of Sales Report</h2>
+        <p>Auto-calculated from submitted records</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-ssr-print" onclick="window.print()">🖨️ Print Report</button>
+        <button class="btn-export" onclick="exportSSRCSV()">📤 Export CSV</button>
+      </div>
+    </div>
+    <div class="ssr-date-bar">
+      <label>Report Date</label>
+      <input type="date" class="ssr-date-input" id="ssrDate" onchange="renderSSR()">
+      <span style="font-size:12px;color:var(--text-light);font-weight:600;" id="ssrDateLabel">Select a date to view report</span>
+    </div>
+    <div class="ssr-body">
+      <table class="ssr-tbl" id="ssrTable">
+        <tbody id="ssrBody">
+          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-light);font-size:13px;font-weight:700;">Select a date above to view the Summary of Sales Report</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       END OF DAY SALES REPORT — Kagaribi Carmona print layout
+       ═══════════════════════════════════════════════════════ -->
+  <div class="sec-title"><span class="sec-dot" style="background:#2e7d32"></span> End of Day Sales Report</div>
+  <div class="eod-wrapper">
+    <div class="eod-topbar">
+      <div>
+        <h2>📄 End of Day Sales Report</h2>
+        <p>Live-connected to Sales Entry · updates as you type · exact layout as printed report</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-eod-print" onclick="printEOD()">🖨️ Print EOD</button>
+        <button class="btn-export" onclick="exportEODCSV()">📤 Export CSV</button>
+      </div>
+    </div>
+    <div class="eod-date-bar">
+      <label>Report Date</label>
+      <input type="date" class="eod-date-input" id="eodDate" onchange="renderEOD()">
+      <span id="eodStatusLabel" style="font-size:12px;font-weight:600;color:var(--text-light);">Select a date to view report</span>
+    </div>
+    <div class="eod-body">
+      <!-- Card rendered by renderEOD() -->
+      <div id="eodCard">
+        <div class="eod-card" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;font-weight:700;">
+          Select a date above to view the End of Day Sales Report
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card s1"><div class="stat-label" id="statAmLabel"> Lunch Total (Today)</div><div class="stat-value" id="stat_am">₱ 0</div></div>
+    <div class="stat-card s2"><div class="stat-label" id="statPmLabel"> Dinner Total (Today)</div><div class="stat-value" id="stat_pm">₱ 0</div></div>
+    <div class="stat-card s3"><div class="stat-label" id="statGrandLabel"> Grand Total (Today)</div><div class="stat-value" id="stat_grand">₱ 0</div></div>
+    <div class="stat-card s4"><div class="stat-label" id="statCountLabel"> Total Records</div><div class="stat-value" id="stat_count">0</div></div>
+    <div class="stat-card s5"><div class="stat-label" id="statExpenseLabel">Store + Kaimono Expenses</div><div class="stat-value" id="stat_expenses">₱ 0</div></div>
+    <div class="stat-card s6"><div class="stat-label" id="statNetLabel">Net Sales (Today)</div><div class="stat-value" id="stat_net">₱ 0</div></div>
+    <div class="stat-card s7"><div class="stat-label" id="statNcdLabel">Net Cash Deposit (Today)</div><div class="stat-value" id="stat_ncd">₱ 0</div></div>
+  </div>
+
+  <!-- Form -->
+  <div class="sec-title"><span class="sec-dot"></span> <span id="entrySectionTitle">New Sales Entry</span></div>
+  <div class="form-card">
+    <div class="date-bar">
+      <label id="reportDateLabel"> Report Date</label>
+      <input type="date" id="reportDate" onchange="onReportDateChange()">
+    </div>
+    <div class="panels">
+      <!-- AM -->
+      <div class="panel panel-am">
+        <div class="panel-head" style="flex-wrap:wrap;gap:8px;">
+          <h3 id="amPanelTitle"> Lunch Sales</h3>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <div style="background:rgba(0,0,0,0.18);border-radius:8px;padding:4px 12px;text-align:center;">
+              <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:0.8px;">Net (less SC)</div>
+              <div style="font-size:15px;font-weight:900;color:#fff;" id="am_net_sc_display">₱ 0.00</div>
+            </div>
+            <span class="shift-pill" id="amShiftPill">AM Shift</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="frow"><label id="amCashLabel">Cash</label><input type="number" id="am_cash" placeholder="0.00" min="0" step="0.01" oninput="calc('am')"></div>
+          <div class="frow"><label id="amCardLabel">Card</label><input type="number" id="am_card" placeholder="0.00" min="0" step="0.01" oninput="calc('am')"></div>
+          <div class="frow"><label id="amGcashLabel">G-Cash</label><input type="number" id="am_gcash" placeholder="0.00" min="0" step="0.01" oninput="calc('am')"></div>
+          <div class="total-box"><span class="tl" id="amTotalLabel">Total Sales (AM)</span><span class="tv" id="am_total">₱ 0.00</span></div>
+          <div class="total-box" style="background:linear-gradient(135deg,#fff3ef,#ffe0d6);border-color:var(--am);margin-top:-4px;"><span class="tl" style="color:#bf360c;">AM Svc Charge</span><span class="tv" style="color:var(--am);" id="am_sc_display">₱ 0.00</span></div>
+          <div class="frow"><label id="amTablesLabel">No. Tables</label><input type="number" id="am_tables" placeholder="0" min="0" oninput="liveUpdateSSR()"></div>
+          <div class="frow"><label id="amGuestsLabel">No. Guests</label><input type="number" id="am_guests" placeholder="0" min="0" oninput="calc('am')"></div>
+          <div class="frow"><label id="amAvgLabel">Avg/Guest</label><input type="text" id="am_avg" readonly placeholder="Auto"></div>
+          <div class="frow"><label id="amScLabel">Svc Charge</label><input type="text" id="am_sc" readonly placeholder="Auto (VAT-excl.)"></div>
+          <div class="divider"></div>
+          <div class="crow"><label id="amCashierLabel">Cashier</label><select id="am_cashier" onchange="liveUpdateSSR()"><option value="">Select</option></select></div>
+        </div>
+      </div>
+      <!-- PM -->
+      <div class="panel panel-pm">
+        <div class="panel-head" style="flex-wrap:wrap;gap:8px;">
+          <h3 id="pmPanelTitle"> Dinner Sales</h3>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <div style="background:rgba(0,0,0,0.18);border-radius:8px;padding:4px 12px;text-align:center;">
+              <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:0.8px;">Net (less SC)</div>
+              <div style="font-size:15px;font-weight:900;color:#fff;" id="pm_net_sc_display">₱ 0.00</div>
+            </div>
+            <span class="shift-pill" id="pmShiftPill">PM Shift</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="frow"><label id="pmCashLabel">Cash</label><input type="number" id="pm_cash" placeholder="0.00" min="0" step="0.01" oninput="calc('pm')"></div>
+          <div class="frow"><label id="pmCardLabel">Card</label><input type="number" id="pm_card" placeholder="0.00" min="0" step="0.01" oninput="calc('pm')"></div>
+          <div class="frow"><label id="pmGcashLabel">G-Cash</label><input type="number" id="pm_gcash" placeholder="0.00" min="0" step="0.01" oninput="calc('pm')"></div>
+          <div class="total-box"><span class="tl" id="pmTotalLabel">Total Sales (PM)</span><span class="tv" id="pm_total">₱ 0.00</span></div>
+          <div class="total-box" style="background:linear-gradient(135deg,#eff0ff,#d9dcf8);border-color:var(--pm);margin-top:-4px;"><span class="tl" style="color:#283593;">PM Svc Charge</span><span class="tv" style="color:var(--pm);" id="pm_sc_display">₱ 0.00</span></div>
+          <div class="frow"><label id="pmTablesLabel">No. Tables</label><input type="number" id="pm_tables" placeholder="0" min="0" oninput="liveUpdateSSR()"></div>
+          <div class="frow"><label id="pmGuestsLabel">No. Guests</label><input type="number" id="pm_guests" placeholder="0" min="0" oninput="calc('pm')"></div>
+          <div class="frow"><label id="pmAvgLabel">Avg/Guest</label><input type="text" id="pm_avg" readonly placeholder="Auto"></div>
+          <div class="frow"><label id="pmScLabel">Svc Charge</label><input type="text" id="pm_sc" readonly placeholder="Auto (VAT-excl.)"></div>
+          <div class="divider"></div>
+          <div class="crow"><label id="pmCashierLabel">Cashier</label><select id="pm_cashier" onchange="liveUpdateSSR()"><option value="">Select</option></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="expense-panel">
+      <h3 id="expensePanelTitle">Expenses</h3>
+      <div class="expense-grid">
+        <div class="frow"><label id="storeExpenseLabel">Store Expenses</label><input type="number" id="store_expenses" placeholder="0.00" min="0" step="0.01" oninput="updateExpensePreview()"></div>
+        <div class="frow"><label id="kaimonoExpenseLabel">Kaimono Expenses</label><input type="number" id="kaimono_expenses" placeholder="0.00" min="0" step="0.01" oninput="updateExpensePreview()"></div>
+        <div class="frow"><label id="gcashExpenseLabel" style="color:#7b1fa2;">GCash Expenses</label><input type="number" id="gcash_expenses" placeholder="0.00" min="0" step="0.01" oninput="updateExpensePreview()" style="border-color:#ce93d8;" title="GCash Expenses — not deducted from Net Cash Deposit"></div>
+        <div class="frow" style="align-items:center;"><label></label><span style="font-size:11px;color:#9c4dcc;font-weight:700;">↑ Not connected to Net Cash Deposit</span></div>
+      </div>
+      <div class="expense-summary">
+        <div class="total-box"><span class="tl" id="totalExpensesLabel">Total Expenses</span><span class="tv" id="expense_total">₱ 0.00</span></div>
+        <div class="total-box" style="background:linear-gradient(135deg,#fce4ec,#fff0f4);border-color:#e91e63;"><span class="tl" style="color:#880e4f;">Total Svc Charge</span><span class="tv" style="color:#c2185b;" id="sc_total_display">₱ 0.00</span></div>
+        <div class="total-box net-box"><span class="tl" id="netSalesLabel">Net Sales</span><span class="tv" id="net_total">₱ 0.00</span></div>
+      </div>
+      <div class="expense-summary" style="margin-top:10px;">
+        <div class="total-box" style="background:linear-gradient(135deg,#f3e5f5,#fdf0ff);border-color:#ce93d8;grid-column:1/-1;"><span class="tl" style="color:#6a1b9a;">GCash Expenses <span style="font-weight:600;font-size:10px;">(info only — not in NCD)</span></span><span class="tv" style="color:#7b1fa2;" id="gcash_expense_display">₱ 0.00</span></div>
+      </div>
+      <div class="expense-summary" style="margin-top:10px;">
+        <div class="total-box ncd-box" style="grid-column:1/-1;"><span class="tl"> Net Cash Deposit</span><span class="tv" id="ncd_total">₱ 0.00</span></div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-clear" id="clearBtn" onclick="clearForm()"> Clear Form</button>
+      <button class="btn btn-submit" id="submitBtn" onclick="submitReport()"> Submit Report</button>
+    </div>
+  </div>
+
+  <!-- Daily Totals Summary -->
+  <div class="sec-title"><span class="sec-dot" style="background:#1e88e5"></span> Daily Totals Summary</div>
+  <div class="daily-summary-card">
+    <div class="daily-summary-head">
+      <div>
+        <h2> Daily Totals by Category</h2>
+        <p id="dailySummaryMeta">No records yet</p>
+      </div>
+      <button class="btn-export" onclick="exportDailySummaryCSV()"> Export Summary CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table class="ds-table" id="dsSummaryTable">
+        <thead>
+          <tr>
+            <th rowspan="2" style="vertical-align:bottom;">Date</th>
+            <th colspan="4" style="text-align:center;background:var(--am-light);color:var(--am);border-bottom:1px solid var(--am-mid);">🌅 AM (Lunch) Shift</th>
+            <th colspan="4" style="text-align:center;background:var(--pm-light);color:var(--pm);border-bottom:1px solid var(--pm-mid);">🌙 PM (Dinner) Shift</th>
+            <th colspan="2" style="text-align:center;background:#e8f5e9;color:var(--green);border-bottom:1px solid #a5d6a7;">Sales Totals</th>
+            <th colspan="3" style="text-align:center;background:#fce4ec;color:#c2185b;border-bottom:1px solid #f48fb1;">Service Charges</th>
+            <th colspan="2" style="text-align:center;background:var(--red-light);color:var(--red);border-bottom:1px solid #ef9a9a;">Expenses</th>
+            <th colspan="2" style="text-align:center;background:#e3f2fd;color:#1565c0;border-bottom:1px solid #90caf9;">Net Figures</th>
+            <th rowspan="2" style="vertical-align:bottom;">Records</th>
+            <th rowspan="2" class="ds-act" style="vertical-align:bottom;">Actions</th>
+          </tr>
+          <tr>
+            <th style="color:var(--am);background:var(--am-light);">Cash</th>
+            <th style="color:var(--am);background:var(--am-light);">Card</th>
+            <th style="color:#7b1fa2;background:var(--am-light);">G-Cash</th>
+            <th style="color:var(--am);background:var(--am-light);">Total</th>
+            <th style="color:var(--pm);background:var(--pm-light);">Cash</th>
+            <th style="color:var(--pm);background:var(--pm-light);">Card</th>
+            <th style="color:#7b1fa2;background:var(--pm-light);">G-Cash</th>
+            <th style="color:var(--pm);background:var(--pm-light);">Total</th>
+            <th style="color:var(--green);background:#e8f5e9;">Gross Sales</th>
+            <th style="color:var(--green);background:#e8f5e9;">Net Sales</th>
+            <th style="color:var(--am);background:#fce4ec;">AM SC</th>
+            <th style="color:var(--pm);background:#fce4ec;">PM SC</th>
+            <th style="color:#c2185b;background:#fce4ec;">Total SC</th>
+            <th style="color:var(--red);background:var(--red-light);">Store Exp.</th>
+            <th style="color:#e65100;background:var(--red-light);">Kaimono Exp.</th>
+            <th style="color:#1565c0;background:#e3f2fd;">Net Cash Dep.</th>
+            <th style="color:var(--green);background:#e8f5e9;">Total Exp.</th>
+          </tr>
+        </thead>
+        <tbody id="dailySummaryBody"></tbody>
+        <tfoot id="dailySummaryFoot"></tfoot>
+      </table>
+      <div class="empty-state" id="dailySummaryEmpty">
+        <div class="eico"></div>
+        <p>No daily totals yet</p>
+        <small>Submit reports to see daily category totals here</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="sec-title"><span class="sec-dot"></span> <span id="historySectionTitle">Sales History</span></div>
+  <div class="history-card">
+    <div class="history-head">
+      <div>
+        <h2 id="historyTitle"> All Submitted Records</h2>
+        <p id="histMeta">No records yet</p>
+      </div>
+      <button class="btn-export" id="exportBtn" onclick="exportCSV()"> Export CSV</button>
+      <button class="btn-clear-history" onclick="requireAdminAction('clearAllRecords',null)" title="Permanently delete all sales records — requires admin">🗑️ Clear All History</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th id="thDate">Date</th>
+            <th id="thAmCash">AM Cash</th><th id="thAmCard">AM Card</th><th id="thAmGcash">AM G-Cash</th><th id="thAmTotal">AM Total</th><th id="thAmTables">AM Tables</th><th id="thAmGuests">AM Guests</th><th id="thAmSc">AM SC</th><th id="thAmCashier">AM Cashier</th>
+            <th id="thPmCash">PM Cash</th><th id="thPmCard">PM Card</th><th id="thPmGcash">PM G-Cash</th><th id="thPmTotal">PM Total</th><th id="thPmTables">PM Tables</th><th id="thPmGuests">PM Guests</th><th id="thPmSc">PM SC</th><th id="thPmCashier">PM Cashier</th>
+            <th id="thGrand">Grand Total</th><th id="thStoreExpenses">Store Expenses</th><th id="thKaimonoExpenses">Kaimono Expenses</th><th id="thTotalExpenses">Total Expenses</th><th id="thNetSales">Net Sales</th><th id="thNetCashDep"> Net Cash Deposit</th><th id="thActions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+      <div class="pagination" id="histPagination" style="display:none;">
+        <span class="pg-info" id="histPageInfo"></span>
+        <div class="pagination-btns" id="histPageBtns"></div>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <div class="eico"></div>
+        <p id="emptyTitle">No records submitted yet</p>
+        <small id="emptyHint">Fill out the form above and click Submit Report</small>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Transaction Backtracking -->
+  <div class="sec-title"><span class="sec-dot"></span> <span id="transactionSectionTitle">Transaction History</span></div>
+  <div class="history-card">
+    <div class="history-head">
+      <div>
+        <h2 id="transactionTitle">Backtracking Log</h2>
+        <p id="transactionMeta">No transaction history yet</p>
+      </div>
+      <button class="btn-export" id="transactionExportBtn" onclick="exportTransactionsCSV()">📤 Export Transaction History</button>
+      <button class="btn-clear-all" onclick="requireAdminAction('clearAllTx',null)" title="Requires admin login">🗑️ Clear All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th><th>Action</th><th>Report Date</th><th>AM Total</th><th>PM Total</th><th>Gross Sales</th><th>Store Expenses</th><th>Kaimono Expenses</th><th>Total Expenses</th><th>Net Sales</th><th>Net Cash Deposit</th><th>Cashiers</th><th style="text-align:center;">Admin Actions</th>
+          </tr>
+        </thead>
+        <tbody id="transactionBody"></tbody>
+      </table>
+      <div class="pagination" id="txPagination" style="display:none;">
+        <span class="pg-info" id="txPageInfo"></span>
+        <div class="pagination-btns" id="txPageBtns"></div>
+      </div>
+      <div class="empty-state" id="transactionEmpty">
+        <div class="eico">TX</div>
+        <p>No transactions recorded yet</p>
+        <small>Submitted, edited, and deleted reports will be retained here for backtracking</small>
+      </div>
+    </div>
+  </div>
+  </div><!-- end panel-admin -->
+
+  <!-- TAB: Waitress Summary -->
+  <div class="tab-panel" id="panel-waitress">
+    <div class="waitress-card">
+      <div class="waitress-head">
+        <div>
+          <h2>👩‍💼 Waitress / Cashier Summary</h2>
+          <p>View and annotate your shift reports. Cashiers can add notes to their own entries.</p>
+        </div>
+        <button class="btn-export" onclick="exportWaitressCSV()">📤 Export My Summary</button>
+      </div>
+      <!-- Filters -->
+      <div class="waitress-filters">
+        <label>Cashier</label>
+        <select id="w_cashierFilter" onchange="renderWaitressSummary()">
+          <option value="">— All Cashiers —</option>
+        </select>
+        <label>From</label>
+        <input type="date" id="w_dateFrom" onchange="renderWaitressSummary()">
+        <label>To</label>
+        <input type="date" id="w_dateTo" onchange="renderWaitressSummary()">
+        <button class="btn-export" onclick="clearWaitressFilters()">✕ Clear Filters</button>
+      </div>
+      <!-- Stats -->
+      <div class="w-stat-row" id="w_statsRow">
+        <div class="w-stat"><div class="wsl">Shifts Worked</div><div class="wsv" id="ws_shifts">0</div></div>
+        <div class="w-stat" style="border-left-color:var(--pm);"><div class="wsl">Total Sales Handled</div><div class="wsv" style="color:var(--pm);" id="ws_sales">₱0</div></div>
+        <div class="w-stat" style="border-left-color:var(--green);"><div class="wsl">Total Service Charge</div><div class="wsv" style="color:var(--green);" id="ws_sc">₱0</div></div>
+        <div class="w-stat" style="border-left-color:#1565c0;"><div class="wsl">Avg Sale / Shift</div><div class="wsv" style="color:#1565c0;" id="ws_avg">₱0</div></div>
+      </div>
+      <!-- Table -->
+      <div class="w-table-wrap">
+        <table class="w-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Shift</th>
+              <th>Cashier</th>
+              <th>Cash</th>
+              <th>Card</th>
+              <th>G-Cash</th>
+              <th>Total Sales</th>
+              <th>Svc Charge</th>
+              <th>Tables</th>
+              <th>Guests</th>
+              <th>Notes (Editable)</th>
+              <th>Save</th>
+            </tr>
+          </thead>
+          <tbody id="waitressBody"></tbody>
+        </table>
+        <div class="w-empty" id="waitressEmpty">
+          <div class="eico">👩‍💼</div>
+          <p>No shifts found</p>
+          <small>Select a cashier or adjust the date range above</small>
+        </div>
+      </div>
+    </div>
+  </div><!-- end panel-waitress -->
+
+</main>
+
+<!-- Admin Login Modal -->
+<div class="overlay" id="adminModal">
+  <div class="modal">
+    <h2> Admin Login</h2>
+    <p>Enter the admin password to access settings.</p>
+    <div class="mf">
+      <label>Password</label>
+      <input type="password" id="adminPw" placeholder="Enter password" onkeydown="if(event.key==='Enter')verifyAdmin()">
+    </div>
+    <div id="adminErr" style="color:var(--red);font-size:12px;font-weight:700;margin-top:-8px;display:none;"> Incorrect password</div>
+    <div class="m-actions">
+      <button class="btn-mc" onclick="closeAdmin()">Cancel</button>
+      <button class="btn-mo" onclick="verifyAdmin()">Enter </button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Settings Modal -->
+<div class="overlay" id="settingsModal">
+  <div class="modal" style="width:640px;max-height:88vh;overflow:auto;">
+    <h2> Admin Settings</h2>
+    <p>Manage report labels, cashiers, service charge rate, and password.</p>
+    <div class="mf">
+      <label>Report Name</label>
+      <input type="text" id="set_appTitle">
+    </div>
+    <div class="mf">
+      <label>Report Subtitle</label>
+      <input type="text" id="set_appSubtitle">
+    </div>
+    <div class="mf">
+      <label>New Entry Section Title</label>
+      <input type="text" id="set_entryTitle">
+    </div>
+    <div class="mf">
+      <label>History Section Title</label>
+      <input type="text" id="set_historyTitle">
+    </div>
+    <div class="mf">
+      <label>Lunch / AM Label</label>
+      <input type="text" id="set_amName">
+    </div>
+    <div class="mf">
+      <label>Dinner / PM Label</label>
+      <input type="text" id="set_pmName">
+    </div>
+    <div class="mf">
+      <label>Payment Labels (Cash, Card, G-Cash)</label>
+      <input type="text" id="set_paymentLabels" placeholder="Cash, Card, G-Cash">
+    </div>
+    <div class="mf">
+      <label>Expense Labels (Store Expenses, Kaimono Expenses)</label>
+      <input type="text" id="set_expenseLabels" placeholder="Store Expenses, Kaimono Expenses">
+    </div>
+    <div class="mf">
+      <label>Cashier Names (one per line)</label>
+      <textarea id="cashierList" rows="6" placeholder="Kyla&#10;Jovelyn&#10;..."></textarea>
+    </div>
+    <div class="mf">
+      <label>Service Charge % (applied to VAT-exclusive sales, i.e. total ÷ 1.12)</label>
+      <input type="number" id="scRate" min="0" max="100" step="0.5">
+    </div>
+    <div class="mf">
+      <label>New Admin Password (leave blank to keep)</label>
+      <input type="password" id="newPw" placeholder="Leave blank to keep current">
+    </div>
+    <div class="m-actions">
+      <button class="btn-mc" onclick="closeSettings()">Cancel</button>
+      <button class="btn-mo" onclick="saveSettings()"> Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Restore / Backup Modal -->
+<div class="overlay" id="restoreModal">
+  <div class="modal backup-modal">
+    <h2> Backup & Restore</h2>
+    <p>Export all your data to a JSON file, or import a previous backup to restore everything — reports, transactions, and settings.</p>
+
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-mid);margin-bottom:6px;">Current Storage</div>
+    <div class="backup-stat-row">
+      <div class="bstat"><div class="bsv" id="bk_records">0</div><div class="bsl">Reports</div></div>
+      <div class="bstat"><div class="bsv" id="bk_tx">0</div><div class="bsl">Transactions</div></div>
+      <div class="bstat"><div class="bsv" id="bk_days">0</div><div class="bsl">Days Logged</div></div>
+    </div>
+
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-mid);margin:14px 0 6px;"> Export Backup</div>
+    <button class="btn-backup" style="width:100%;padding:12px;font-size:13px;border-radius:10px;" onclick="backupData()"> Download Full Backup (JSON)</button>
+    <button class="btn-restore" style="width:100%;padding:12px;font-size:13px;border-radius:10px;margin-top:8px;" onclick="exportExcelWorkbook('manual')"> Download Excel Report (.xls)</button>
+
+    <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-mid);margin:18px 0 6px;"> Restore from Backup</div>
+    <div class="restore-zone" id="restoreZone" onclick="document.getElementById('restoreFile').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="event.preventDefault();this.classList.remove('drag');handleRestoreFile(event.dataTransfer.files[0])">
+      <input type="file" id="restoreFile" accept=".json" onchange="handleRestoreFile(this.files[0])">
+      <div style="font-size:32px;"></div>
+      <p>Click or drag & drop a backup JSON file here</p>
+      <small>Only .json files exported from this app are accepted</small>
+    </div>
+    <div class="restore-preview" id="restorePreview">
+      <h4 id="restorePreviewTitle"> Ready to restore</h4>
+      <p id="restorePreviewDetail"></p>
+    </div>
+    <div class="restore-warn"> Restoring will merge backup data with your current records. Existing data is never deleted — only new records from the backup are added.</div>
+    <div class="m-actions" style="margin-top:20px;">
+      <button class="btn-mc" onclick="closeRestoreModal()">Close</button>
+      <button class="btn-mo" id="restoreConfirmBtn" style="display:none;" onclick="confirmRestore()"> Restore Now</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="tIcon"></span> <span id="tMsg">Done!</span></div>
+
+<script>
+//  Data Version — bump this when new fields are added so migrations run safely
+const DATA_VERSION = 3;
+const STORED_VERSION = parseInt(localStorage.getItem('sr_data_version') || '0');
+const DEFAULT_CASHIERS = ["Kyla","Jovelyn","Maria","Jose","Ana"];
+
+function safeJsonLoad(key, fallback){
+  try {
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed ?? fallback;
+  } catch(err){
+    console.warn(`Ignoring invalid saved value for ${key}`, err);
+    localStorage.removeItem(key);
+    return fallback;
+  }
+}
+function safeStoredNumber(key, fallback){
+  const n = parseFloat(localStorage.getItem(key));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+//  State — safe-load: never overwrites existing data, only fills missing fields
+let records  = safeJsonLoad('sr_records', []);
+let transactions = safeJsonLoad('sr_transactions', []);
+let cashiers = safeJsonLoad('sr_cashiers', DEFAULT_CASHIERS);
+if(!Array.isArray(records)) records = [];
+if(!Array.isArray(transactions)) transactions = [];
+if(!Array.isArray(cashiers) || !cashiers.length) cashiers = DEFAULT_CASHIERS;
+let adminPwd = localStorage.getItem('sr_adminpwd') || 'admin123';
+let adminUnlocked = false;
+let pendingAdminAction = null;
+let scRate   = safeStoredNumber('sr_scrate', 5);
+const defaultSettings = {
+  appTitle:'SalesTrack', appSubtitle:'Daily Sales Report System', entryTitle:'New Sales Entry', historyTitle:'Sales History',
+  amName:'Lunch', amPill:'AM Shift', pmName:'Dinner', pmPill:'PM Shift',
+  payment1:'Cash', payment2:'Card', payment3:'G-Cash', tablesLabel:'No. Tables', guestsLabel:'No. Guests', avgLabel:'Avg/Guest', scLabel:'Svc Charge', cashierLabel:'Cashier',
+  reportDateLabel:'Report Date', grandLabel:'Grand Total', recordsLabel:'Total Records', actionsLabel:'Actions',
+  expensePanelTitle:'Expenses', storeExpenseLabel:'Store Expenses', kaimonoExpenseLabel:'Kaimono Expenses', totalExpensesLabel:'Total Expenses', netSalesLabel:'Net Sales',
+  clearLabel:'🗑️ Clear Form', submitLabel:'✅ Submit Report', exportLabel:'📤 Export CSV', historyHeading:'All Submitted Records',
+  emptyTitle:'No records submitted yet', emptyHint:'Fill out the form above and click Submit Report',
+  transactionTitle:'Backtracking Log', transactionSectionTitle:'Transaction History', transactionExportLabel:'📤 Export Transaction History'
+};
+let appSettings = loadSettings();
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function loadSettings(){
+  const saved = safeJsonLoad('sr_settings', {});
+  return {...defaultSettings, ...(saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {})};
+}
+function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent=value; }
+function setValue(id, value){ const el=document.getElementById(id); if(el) el.value=value; }
+function labelText(value){ return String(value || '').trim(); }
+function applySettings(){
+  const s = appSettings;
+  document.title = s.appSubtitle || s.appTitle;
+  setText('brandTitle', s.appTitle); setText('brandSubtitle', s.appSubtitle);
+  setText('adminButton','Admin'); setText('entrySectionTitle', s.entryTitle); setText('historySectionTitle', s.historyTitle);
+  setText('reportDateLabel', s.reportDateLabel); setText('historyTitle', s.historyHeading); setText('exportBtn', s.exportLabel);
+  setText('emptyTitle', s.emptyTitle); setText('emptyHint', s.emptyHint);
+  setText('transactionSectionTitle', s.transactionSectionTitle); setText('transactionTitle', s.transactionTitle); setText('transactionExportBtn', s.transactionExportLabel);
+  setText('amPanelTitle', `${s.amName} Sales`); setText('pmPanelTitle', `${s.pmName} Sales`);
+  setText('amShiftPill', s.amPill); setText('pmShiftPill', s.pmPill);
+  setText('amCashLabel', s.payment1); setText('pmCashLabel', s.payment1);
+  setText('amCardLabel', s.payment2); setText('pmCardLabel', s.payment2);
+  setText('amGcashLabel', s.payment3); setText('pmGcashLabel', s.payment3);
+  setText('amTablesLabel', s.tablesLabel); setText('pmTablesLabel', s.tablesLabel);
+  setText('amGuestsLabel', s.guestsLabel); setText('pmGuestsLabel', s.guestsLabel);
+  setText('amAvgLabel', s.avgLabel); setText('pmAvgLabel', s.avgLabel);
+  setText('amScLabel', s.scLabel); setText('pmScLabel', s.scLabel);
+  setText('amCashierLabel', s.cashierLabel); setText('pmCashierLabel', s.cashierLabel);
+  setText('amTotalLabel', `Total Sales (${s.amPill.replace(' Shift','') || 'AM'})`);
+  setText('pmTotalLabel', `Total Sales (${s.pmPill.replace(' Shift','') || 'PM'})`);
+  setText('statAmLabel', `${s.amName} Total (Today)`); setText('statPmLabel', `${s.pmName} Total (Today)`);
+  setText('statGrandLabel', `${s.grandLabel} (Today)`); setText('statCountLabel', s.recordsLabel);
+  setText('clearBtn', s.clearLabel); setText('submitBtn', s.submitLabel);
+  setText('expensePanelTitle', s.expensePanelTitle); setText('storeExpenseLabel', s.storeExpenseLabel); setText('kaimonoExpenseLabel', s.kaimonoExpenseLabel);
+  setText('totalExpensesLabel', s.totalExpensesLabel); setText('netSalesLabel', s.netSalesLabel);
+  setText('thDate','Date'); setText('thAmCash',`${s.amPill} ${s.payment1}`); setText('thAmCard',`${s.amPill} ${s.payment2}`); setText('thAmGcash',`${s.amPill} ${s.payment3}`);
+  setText('thAmTotal',`${s.amPill} Total`); setText('thAmTables',`${s.amPill} Tables`); setText('thAmGuests',`${s.amPill} Guests`); setText('thAmSc',`${s.amPill} SC`); setText('thAmCashier',`${s.amPill} Cashier`);
+  setText('thPmCash',`${s.pmPill} ${s.payment1}`); setText('thPmCard',`${s.pmPill} ${s.payment2}`); setText('thPmGcash',`${s.pmPill} ${s.payment3}`);
+  setText('thPmTotal',`${s.pmPill} Total`); setText('thPmTables',`${s.pmPill} Tables`); setText('thPmGuests',`${s.pmPill} Guests`); setText('thPmSc',`${s.pmPill} SC`); setText('thPmCashier',`${s.pmPill} Cashier`);
+  setText('thGrand',s.grandLabel); setText('thStoreExpenses',s.storeExpenseLabel); setText('thKaimonoExpenses',s.kaimonoExpenseLabel); setText('thTotalExpenses',s.totalExpensesLabel); setText('thNetSales',s.netSalesLabel); setText('thActions',s.actionsLabel);
+}
+function paymentLabelsFromInput(){
+  const parts = document.getElementById('set_paymentLabels').value.split(',').map(v=>v.trim()).filter(Boolean);
+  return [parts[0] || defaultSettings.payment1, parts[1] || defaultSettings.payment2, parts[2] || defaultSettings.payment3];
+}
+function expenseLabelsFromInput(){
+  const parts = document.getElementById('set_expenseLabels').value.split(',').map(v=>v.trim()).filter(Boolean);
+  return [parts[0] || defaultSettings.storeExpenseLabel, parts[1] || defaultSettings.kaimonoExpenseLabel];
+}
+
+function populateCashiers(){
+  ['am_cashier','pm_cashier'].forEach(id => {
+    const sel = document.getElementById(id), cur = sel.value;
+    sel.innerHTML = '<option value="">Select</option>';
+    cashiers.forEach(c => {
+      const o = document.createElement('option');
+      o.value = o.textContent = c;
+      if(c===cur) o.selected=true;
+      sel.appendChild(o);
+    });
+  });
+}
+
+//  Data Version Stamp 
+function stampDataVersion(){ localStorage.setItem('sr_data_version', String(DATA_VERSION)); }
+
+//  Data Shield 
+function updateShield(){
+  const uniqueDays = new Set(records.map(r=>r.date)).size;
+  document.getElementById('shieldRecords').textContent = records.length;
+  document.getElementById('shieldTx').textContent      = transactions.length;
+  document.getElementById('shieldDays').textContent    = uniqueDays;
+  document.getElementById('bk_records').textContent    = records.length;
+  document.getElementById('bk_tx').textContent         = transactions.length;
+  document.getElementById('bk_days').textContent       = uniqueDays;
+  const lastBk = localStorage.getItem('sr_last_backup');
+  document.getElementById('shieldLastBackup').textContent = lastBk
+    ? ` Last backup: ${new Date(lastBk).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})} · ${records.length} report${records.length!==1?'s':''} protected`
+    : `All records preserved in local storage · Backup recommended`;
+}
+
+//  Backup 
+function backupData(){
+  const payload = {
+    _app:       'KagaribiSalesTrack',
+    _version:   DATA_VERSION,
+    _exported:  new Date().toISOString(),
+    _records:   records.length,
+    _transactions: transactions.length,
+    records,
+    transactions,
+    cashiers,
+    scRate,
+    settings:   appSettings
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json,' + encodeURIComponent(json);
+  const stamp = new Date().toISOString().slice(0,10);
+  a.download = `kagaribi_backup_${stamp}.json`;
+  a.click();
+  localStorage.setItem('sr_last_backup', new Date().toISOString());
+  updateShield();
+  toast('✅','Backup downloaded successfully!');
+}
+
+//  Restore 
+let _pendingRestore = null;
+function openRestoreModal(){
+  updateShield();
+  document.getElementById('restorePreview').style.display='none';
+  document.getElementById('restoreConfirmBtn').style.display='none';
+  document.getElementById('restoreFile').value='';
+  _pendingRestore = null;
+  document.getElementById('restoreModal').classList.add('open');
+}
+function closeRestoreModal(){
+  document.getElementById('restoreModal').classList.remove('open');
+  _pendingRestore = null;
+}
+function handleRestoreFile(file){
+  if(!file || !file.name.endsWith('.json')){ toast('⚠️','Please select a valid .json backup file.','warn'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(data._app !== 'KagaribiSalesTrack'){ toast('⚠️','This file is not a Kagaribi backup.','warn'); return; }
+      _pendingRestore = data;
+      const newRecs = (data.records||[]).filter(nr=>!records.find(r=>r.id===nr.id)).length;
+      const newTx   = (data.transactions||[]).filter(nt=>!transactions.find(t=>t.id===nt.id)).length;
+      document.getElementById('restorePreviewTitle').textContent = ` Backup from ${data._exported ? new Date(data._exported).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : 'unknown date'}`;
+      document.getElementById('restorePreviewDetail').textContent =
+        `${data._records||0} reports & ${data._transactions||0} transactions in file · ${newRecs} new reports and ${newTx} new transactions will be added (duplicates skipped). An Excel report will download after restore.`;
+      document.getElementById('restorePreview').style.display='block';
+      document.getElementById('restoreConfirmBtn').style.display='inline-flex';
+    } catch(err){ toast('⚠️','Could not read backup file.','warn'); }
+  };
+  reader.readAsText(file);
+}
+function confirmRestore(){
+  if(!_pendingRestore){ return; }
+  const data = _pendingRestore;
+  let addedRec=0, addedTx=0;
+  (data.records||[]).forEach(nr=>{ if(!records.find(r=>r.id===nr.id)){ records.push(normalizeRecord(nr)); addedRec++; } });
+  (data.transactions||[]).forEach(nt=>{ if(!transactions.find(t=>t.id===nt.id)){ transactions.unshift(nt); addedTx++; } });
+  records.sort((a,b)=>b.id-a.id);
+  save(); saveTransactions(); stampDataVersion();
+  renderHistory(); renderDailySummary(); renderTransactions(); updateStats(); updateShield();
+  closeRestoreModal();
+  exportExcelWorkbook('restore');
+  toast('✅','Restored! '+addedRec+' reports & '+addedTx+' transactions added. Excel report downloaded.');
+}
+
+//  Helpers / Formulas 
+const moneyFmt = new Intl.NumberFormat('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const cleanNumber = v => {
+  if(v === null || v === undefined) return 0;
+  const n = parseFloat(String(v).replace(/[^0-9.-]/g,''));
+  return Number.isFinite(n) ? n : 0;
+};
+const roundMoney = n => Math.round((cleanNumber(n) + Number.EPSILON) * 100) / 100;
+const nonNegativeMoney = n => Math.max(0, roundMoney(n));
+const nonNegativeInt = n => Math.max(0, Math.floor(cleanNumber(n)));
+const hasNegativeInput = ids => ids.some(id => cleanNumber(document.getElementById(id)?.value) < 0);
+const gv  = id => cleanNumber(document.getElementById(id)?.value);
+const ev  = id => cleanNumber(document.getElementById(id)?.value);
+const fmt = n  => '₱ ' + moneyFmt.format(roundMoney(n));
+const pln = n  => moneyFmt.format(roundMoney(n));
+
+// Debounce — prevents calc firing on every keystroke
+function debounce(fn, ms){
+  let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), ms); };
+}
+
+// Memoized date formatters — avoids creating Date objects on every table row
+const _dateFmtCache = {};
+function fmtDate(d){
+  if(!_dateFmtCache[d]) _dateFmtCache[d] = new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+  return _dateFmtCache[d];
+}
+const _tsFmtCache = {};
+function fmtTimestamp(ts){
+  if(!_tsFmtCache[ts]) _tsFmtCache[ts] = new Date(ts).toLocaleString('en-PH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  return _tsFmtCache[ts];
+}
+
+// Normalized record cache — normalize once, reuse across all render calls
+let _normCache = null;
+function invalidateCache(){ _normCache = null; }
+function getNorm(){
+  if(!_normCache) _normCache = records.map(r => normalizeRecord(JSON.parse(JSON.stringify(r))));
+  return _normCache;
+}
+
+// RAF-batched render — all renders scheduled in a single animation frame
+let _rafPending = false;
+let _rafQueue = new Set();
+function scheduleRender(...fns){
+  fns.forEach(f => _rafQueue.add(f));
+  if(!_rafPending){
+    _rafPending = true;
+    requestAnimationFrame(()=>{
+      const q = [..._rafQueue]; _rafQueue.clear(); _rafPending = false;
+      q.forEach(f => f());
+    });
+  }
+}
+function renderAll(){ scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield, renderSSR, ()=>{
+  populateWaitressCashierFilter();
+  document.getElementById('waitressBadge').textContent = getNorm().reduce((a,r)=>{
+    if(r.am.cashier||r.am.total>0) a++;
+    if(r.pm.cashier||r.pm.total>0) a++;
+    return a;
+  },0);
+}); }
+
+function shiftFormula(cash, card, gcash, guests){
+  const total = roundMoney(nonNegativeMoney(cash) + nonNegativeMoney(card) + nonNegativeMoney(gcash));
+  const safeGuests = nonNegativeInt(guests);
+  const vatExclusive = roundMoney(total / 1.12);
+  const sc = roundMoney(vatExclusive * cleanNumber(scRate) / 100);
+  // Avg/Guest = Shift Sales Total ÷ No. of Guests (lunch sales ÷ lunch guests, dinner sales ÷ dinner guests)
+  const avg = safeGuests > 0 ? roundMoney(total / safeGuests) : 0;
+  return { total, sc, avg, guests:safeGuests };
+}
+
+function expenseFormula(store, kaimono, gross){
+  const storeExpenses = nonNegativeMoney(store);
+  const kaimonoExpenses = nonNegativeMoney(kaimono);
+  const totalExpenses = roundMoney(storeExpenses + kaimonoExpenses);
+  const net = roundMoney(cleanNumber(gross) - totalExpenses);
+  return { store:storeExpenses, kaimono:kaimonoExpenses, total:totalExpenses, net };
+}
+
+function netCashDepositFormula(cash, serviceCharge, expenses){
+  return roundMoney(nonNegativeMoney(cash) - nonNegativeMoney(serviceCharge) - nonNegativeMoney(expenses));
+}
+
+function reportFormula(am, pm, expensesInput){
+  const grand = roundMoney(nonNegativeMoney(am?.total) + nonNegativeMoney(pm?.total));
+  const expenses = expenseFormula(expensesInput?.store, expensesInput?.kaimono, grand);
+  const totalCash = roundMoney(nonNegativeMoney(am?.cash) + nonNegativeMoney(pm?.cash));
+  const totalSc = roundMoney(nonNegativeMoney(am?.sc) + nonNegativeMoney(pm?.sc));
+  return {
+    grand,
+    expenses,
+    net: expenses.net,
+    totalCash,
+    totalSc,
+    netCashDeposit: netCashDepositFormula(totalCash, totalSc, expenses.total)
+  };
+}
+
+function shiftHasEntry(shift){
+  return ['cash','card','gcash','tables','guests'].some(k => cleanNumber(shift?.[k]) > 0);
+}
+
+function formGrossTotal(){
+  const am = shiftFormula(gv('am_cash'), gv('am_card'), gv('am_gcash'), gv('am_guests'));
+  const pm = shiftFormula(gv('pm_cash'), gv('pm_card'), gv('pm_gcash'), gv('pm_guests'));
+  return roundMoney(am.total + pm.total);
+}
+
+function readShift(prefix){
+  const f = shiftFormula(gv(`${prefix}_cash`), gv(`${prefix}_card`), gv(`${prefix}_gcash`), gv(`${prefix}_guests`));
+  return {
+    cash:nonNegativeMoney(gv(`${prefix}_cash`)),
+    card:nonNegativeMoney(gv(`${prefix}_card`)),
+    gcash:nonNegativeMoney(gv(`${prefix}_gcash`)),
+    tables:nonNegativeInt(gv(`${prefix}_tables`)),
+    guests:f.guests,
+    cashier:document.getElementById(`${prefix}_cashier`).value,
+    total:f.total,
+    sc:f.sc,
+    avg:f.avg
+  };
+}
+
+function normalizeShift(shift={}){
+  const f = shiftFormula(shift.cash, shift.card, shift.gcash, shift.guests);
+  return {
+    cash:nonNegativeMoney(shift.cash),
+    card:nonNegativeMoney(shift.card),
+    gcash:nonNegativeMoney(shift.gcash),
+    tables:nonNegativeInt(shift.tables),
+    guests:f.guests,
+    cashier:shift.cashier || '',
+    total:f.total,
+    sc:f.sc,
+    avg:f.avg
+  };
+}
+
+function normalizeRecord(r){
+  r.am = normalizeShift(r.am);
+  r.pm = normalizeShift(r.pm);
+  const totals = reportFormula(r.am, r.pm, r.expenses);
+  r.grand = totals.grand;
+  r.expenses = totals.expenses;
+  r.net = totals.net;
+  r.netCashDeposit = totals.netCashDeposit;
+  return r;
+}
+
+function normalizeRecords(){
+  records = records.map(r => normalizeRecord(JSON.parse(JSON.stringify(r))));
+  invalidateCache();
+  save();
+}
+
+function _calcNow(s){
+  const cash   = gv(s+'_cash');
+  const card   = gv(s+'_card');
+  const gcash  = gv(s+'_gcash');
+  const guests = nonNegativeInt(gv(s+'_guests'));
+  const f = shiftFormula(cash, card, gcash, guests);
+
+  document.getElementById(s+'_total').textContent = fmt(f.total);
+  document.getElementById(s+'_sc').value  = pln(f.sc);
+  document.getElementById(s+'_sc_display').textContent = fmt(f.sc);
+
+  // Net sales = Total Sales less Service Charge
+  const netLessSc = roundMoney(f.total - f.sc);
+  document.getElementById(s+'_net_sc_display').textContent = fmt(netLessSc);
+
+  // Avg/Guest = Net Sales (Total less SC) ÷ No. of Guests
+  const avg = (netLessSc > 0 && guests > 0) ? roundMoney(netLessSc / guests) : 0;
+  document.getElementById(s+'_avg').value = (netLessSc > 0 && guests > 0) ? pln(avg) : '';
+
+  _updateExpenseNow();
+  liveUpdateSSR();
+  liveUpdateEOD();
+}
+const calc = debounce(_calcNow, 60);
+
+function _updateExpenseNow(){
+  const amF = shiftFormula(gv('am_cash'), gv('am_card'), gv('am_gcash'), gv('am_guests'));
+  const pmF = shiftFormula(gv('pm_cash'), gv('pm_card'), gv('pm_gcash'), gv('pm_guests'));
+  const totals = reportFormula(
+    { cash:gv('am_cash'), total:amF.total, sc:amF.sc },
+    { cash:gv('pm_cash'), total:pmF.total, sc:pmF.sc },
+    { store:gv('store_expenses'), kaimono:gv('kaimono_expenses') }
+  );
+  document.getElementById('expense_total').textContent = fmt(totals.expenses.total);
+  document.getElementById('net_total').textContent = fmt(totals.net);
+  document.getElementById('sc_total_display').textContent = fmt(totals.totalSc);
+  document.getElementById('ncd_total').textContent = fmt(totals.netCashDeposit);
+  // GCash Expenses display only — not part of NCD formula
+  const gcashExpEl = document.getElementById('gcash_expense_display');
+  if(gcashExpEl) gcashExpEl.textContent = fmt(gv('gcash_expenses'));
+  liveUpdateSSR();
+  liveUpdateEOD();
+}
+const updateExpensePreview = debounce(_updateExpenseNow, 60);
+
+//  Init 
+(function(){
+  const t = new Date();
+  document.getElementById('headerDate').textContent =
+    t.toLocaleDateString('en-PH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  const ymd = `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+  document.getElementById('reportDate').value = ymd;
+  applySettings();
+  populateCashiers();
+  normalizeRecords();
+  seedTransactions();
+  stampDataVersion();
+  renderHistory();
+  renderDailySummary();
+  renderTransactions();
+  updateStats();
+  updateShield();
+  populateWaitressCashierFilter();
+  ssrInit();
+  eodInit();
+  // Update waitress tab badge on load
+  document.getElementById('waitressBadge').textContent = getNorm().reduce((a,r)=>{
+    if(r.am.cashier||r.am.total>0) a++;
+    if(r.pm.cashier||r.pm.total>0) a++;
+    return a;
+  },0);
+})();
+
+
+//  CLEAR FORM ONLY (history untouched) 
+function clearForm(silent=false){
+  ['cash','card','gcash','tables','guests'].forEach(f=>{
+    ['am','pm'].forEach(s=>{ document.getElementById(`${s}_${f}`).value=''; });
+  });
+  document.getElementById('store_expenses').value='';
+  document.getElementById('kaimono_expenses').value='';
+  document.getElementById('gcash_expenses').value='';
+  ['am','pm'].forEach(s=>{
+    document.getElementById(`${s}_total`).textContent=fmt(0);
+    document.getElementById(`${s}_avg`).value='';
+    document.getElementById(`${s}_sc`).value='';
+    document.getElementById(`${s}_sc_display`).textContent=fmt(0);
+    document.getElementById(`${s}_net_sc_display`).textContent=fmt(0);
+    document.getElementById(`${s}_cashier`).value='';
+  });
+  // Recalculate all expense/net/NCD displays from cleared inputs
+  _updateExpenseNow();
+  if(!silent) toast('🗑️','Form cleared — history is untouched.','warn');
+}
+
+//  Submit 
+function submitReport(){
+  const date = document.getElementById('reportDate').value;
+  if(!date){ toast('⚠️','Please select a report date.','warn'); return; }
+
+  const entryIds = ['am_cash','am_card','am_gcash','am_tables','am_guests',
+                    'pm_cash','pm_card','pm_gcash','pm_tables','pm_guests',
+                    'store_expenses','kaimono_expenses'];
+  if(hasNegativeInput(entryIds)){
+    toast('⚠️','Amounts, tables, and guests cannot be negative.','warn'); return;
+  }
+
+  const am = readShift('am');
+  const pm = readShift('pm');
+  const amActive = shiftHasEntry(am);
+  const pmActive = shiftHasEntry(pm);
+  const totals = reportFormula(am, pm, { store:gv('store_expenses'), kaimono:gv('kaimono_expenses') });
+
+  if(!amActive && !pmActive && totals.expenses.total <= 0){
+    toast('⚠️','Please enter sales or expenses before submitting.','warn'); return;
+  }
+  if(amActive && !am.cashier){ toast('⚠️','Please select an AM cashier.','warn'); return; }
+  if(pmActive && !pm.cashier){ toast('⚠️','Please select a PM cashier.','warn'); return; }
+
+  // Clear cashier for inactive shifts
+  if(!amActive) am.cashier = '';
+  if(!pmActive) pm.cashier = '';
+
+  // Warn on duplicate date
+  if(records.some(r => r.date === date)){
+    if(!confirm(`A record for ${date} already exists.\n\nSubmit an additional entry for this date?`)) return;
+  }
+
+  const row = {
+    id: Date.now(), date, am, pm,
+    grand:           totals.grand,
+    expenses:        totals.expenses,
+    gcashExpenses:   nonNegativeMoney(gv('gcash_expenses')),
+    net:             totals.net,
+    netCashDeposit:  totals.netCashDeposit
+  };
+
+  records.unshift(row);
+  save();                         // save first — before appendTransaction mutates row via cloneRecord
+  appendTransaction('Submitted', row);
+  clearForm(true);
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('✅','Report submitted and saved!');
+}
+
+function save(){ invalidateCache(); localStorage.setItem('sr_records',JSON.stringify(records)); }
+function saveTransactions(){ localStorage.setItem('sr_transactions',JSON.stringify(transactions)); }
+function cloneRecord(r){ return JSON.parse(JSON.stringify(normalizeRecord(r))); }
+function appendTransaction(action, record){
+  const r = cloneRecord(record);
+  transactions.unshift({
+    id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    timestamp: new Date().toISOString(),
+    action, reportId:r.id, date:r.date,
+    amTotal:r.am.total, pmTotal:r.pm.total, grand:r.grand,
+    storeExpenses:r.expenses.store, kaimonoExpenses:r.expenses.kaimono, totalExpenses:r.expenses.total,
+    net:r.net, netCashDeposit:r.netCashDeposit||0, cashiers:`${r.am.cashier || ''} / ${r.pm.cashier || ''}`
+  });
+  saveTransactions();
+}
+function seedTransactions(){
+  if(transactions.length || !records.length) return;
+  records.map(r=>normalizeRecord(JSON.parse(JSON.stringify(r)))).forEach(r=>appendTransaction('Saved Record', r));
+}
+// Pagination state
+let histPage = 0, txPage = 0;
+const PAGE_SIZE = 25;
+
+function renderTransactions(){
+  const tbody = document.getElementById('transactionBody');
+  const empty = document.getElementById('transactionEmpty');
+  if(!tbody || !empty) return;
+  const total = transactions.length;
+  document.getElementById('transactionMeta').textContent = total ? `${total} transaction${total>1?'s':''} retained` : 'No transaction history yet';
+  if(!total){ tbody.innerHTML=''; empty.style.display='block'; document.getElementById('txPagination').style.display='none'; return; }
+  empty.style.display='none';
+  txPage = Math.min(txPage, Math.max(0, Math.ceil(total/PAGE_SIZE)-1));
+  const start = txPage * PAGE_SIZE, slice = transactions.slice(start, start+PAGE_SIZE);
+  const frag = document.createDocumentFragment();
+  slice.forEach(t=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${fmtTimestamp(t.timestamp)}</td><td>${t.action}</td><td>${fmtDate(t.date)}</td><td>₱${pln(t.amTotal)}</td><td>₱${pln(t.pmTotal)}</td><td class="td-grand">₱${pln(t.grand)}</td><td>₱${pln(t.storeExpenses)}</td><td>₱${pln(t.kaimonoExpenses)}</td><td>₱${pln(t.totalExpenses)}</td><td class="td-grand">₱${pln(t.net)}</td><td style="color:#1565c0;font-weight:800;">₱${pln(t.netCashDeposit||0)}</td><td>${t.cashiers}</td><td style="text-align:center;"><button class="btn-del-tx" onclick="requireAdminAction('deleteTx',${JSON.stringify(t.id)})" title="Delete this log entry (requires admin)">${adminUnlocked?'🗑️':'🔒'} Delete</button></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.innerHTML=''; tbody.appendChild(frag);
+  renderPagination('tx', total, txPage, p=>{ txPage=p; renderTransactions(); });
+}
+
+//  Daily Totals Summary — full expanded + inline-editable
+function renderDailySummary(){
+  const tbody  = document.getElementById('dailySummaryBody');
+  const tfoot  = document.getElementById('dailySummaryFoot');
+  const empty  = document.getElementById('dailySummaryEmpty');
+  const meta   = document.getElementById('dailySummaryMeta');
+  if(!tbody) return;
+  const norm = getNorm();
+  if(!norm.length){
+    tbody.innerHTML=''; tfoot.innerHTML='';
+    empty.style.display='block'; meta.textContent='No records yet'; return;
+  }
+  empty.style.display='none';
+
+  // Group all records by date, accumulating full detail
+  const grouped = {};
+  norm.forEach(r=>{
+    if(!grouped[r.date]) grouped[r.date]={
+      amCash:0, amCard:0, amGcash:0, amTotal:0, amSc:0,
+      pmCash:0, pmCard:0, pmGcash:0, pmTotal:0, pmSc:0,
+      gross:0, netSales:0, totalSc:0,
+      store:0, kaimono:0, totalExp:0,
+      ncd:0, count:0,
+      recordIds:[]
+    };
+    const g = grouped[r.date];
+    g.amCash   = roundMoney(g.amCash   + r.am.cash);
+    g.amCard   = roundMoney(g.amCard   + r.am.card);
+    g.amGcash  = roundMoney(g.amGcash  + r.am.gcash);
+    g.amTotal  = roundMoney(g.amTotal  + r.am.total);
+    g.amSc     = roundMoney(g.amSc     + r.am.sc);
+    g.pmCash   = roundMoney(g.pmCash   + r.pm.cash);
+    g.pmCard   = roundMoney(g.pmCard   + r.pm.card);
+    g.pmGcash  = roundMoney(g.pmGcash  + r.pm.gcash);
+    g.pmTotal  = roundMoney(g.pmTotal  + r.pm.total);
+    g.pmSc     = roundMoney(g.pmSc     + r.pm.sc);
+    g.gross    = roundMoney(g.gross    + r.grand);
+    g.netSales = roundMoney(g.netSales + r.net);
+    g.totalSc  = roundMoney(g.totalSc  + r.am.sc + r.pm.sc);
+    g.store    = roundMoney(g.store    + r.expenses.store);
+    g.kaimono  = roundMoney(g.kaimono  + r.expenses.kaimono);
+    g.totalExp = roundMoney(g.totalExp + r.expenses.total);
+    g.ncd      = roundMoney(g.ncd      + (r.netCashDeposit||0));
+    g.count++;
+    g.recordIds.push(r.id);
+  });
+
+  const dates = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+  meta.textContent = `${dates.length} day${dates.length>1?'s':''} with records · click any value to edit`;
+
+  const frag = document.createDocumentFragment();
+  dates.forEach(d=>{
+    const g = grouped[d];
+    const tr = document.createElement('tr');
+    tr.id = `dsrow_${d}`;
+    tr.innerHTML = dsSummaryRowHtml(d, g);
+    frag.appendChild(tr);
+  });
+  tbody.innerHTML=''; tbody.appendChild(frag);
+
+  // Grand totals footer
+  const grand = dates.reduce((acc,d)=>{
+    const g=grouped[d];
+    acc.amCash=roundMoney(acc.amCash+g.amCash); acc.amCard=roundMoney(acc.amCard+g.amCard); acc.amGcash=roundMoney(acc.amGcash+g.amGcash); acc.amTotal=roundMoney(acc.amTotal+g.amTotal); acc.amSc=roundMoney(acc.amSc+g.amSc);
+    acc.pmCash=roundMoney(acc.pmCash+g.pmCash); acc.pmCard=roundMoney(acc.pmCard+g.pmCard); acc.pmGcash=roundMoney(acc.pmGcash+g.pmGcash); acc.pmTotal=roundMoney(acc.pmTotal+g.pmTotal); acc.pmSc=roundMoney(acc.pmSc+g.pmSc);
+    acc.gross=roundMoney(acc.gross+g.gross); acc.netSales=roundMoney(acc.netSales+g.netSales); acc.totalSc=roundMoney(acc.totalSc+g.totalSc);
+    acc.store=roundMoney(acc.store+g.store); acc.kaimono=roundMoney(acc.kaimono+g.kaimono); acc.totalExp=roundMoney(acc.totalExp+g.totalExp);
+    acc.ncd=roundMoney(acc.ncd+g.ncd); acc.count+=g.count; return acc;
+  },{amCash:0,amCard:0,amGcash:0,amTotal:0,amSc:0,pmCash:0,pmCard:0,pmGcash:0,pmTotal:0,pmSc:0,gross:0,netSales:0,totalSc:0,store:0,kaimono:0,totalExp:0,ncd:0,count:0});
+
+  tfoot.innerHTML=`<tr>
+    <td class="ds-date" style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">🏁 ALL DAYS</td>
+    <td class="ds-am-cash">₱${pln(grand.amCash)}</td><td class="ds-am-card">₱${pln(grand.amCard)}</td><td class="ds-am-gcash">₱${pln(grand.amGcash)}</td><td class="ds-am-total">₱${pln(grand.amTotal)}</td>
+    <td class="ds-pm-cash">₱${pln(grand.pmCash)}</td><td class="ds-pm-card">₱${pln(grand.pmCard)}</td><td class="ds-pm-gcash">₱${pln(grand.pmGcash)}</td><td class="ds-pm-total">₱${pln(grand.pmTotal)}</td>
+    <td class="ds-gross">₱${pln(grand.gross)}</td><td class="ds-net-sales">₱${pln(grand.netSales)}</td>
+    <td class="ds-am-sc">₱${pln(grand.amSc)}</td><td class="ds-pm-sc">₱${pln(grand.pmSc)}</td><td class="ds-total-sc">₱${pln(grand.totalSc)}</td>
+    <td class="ds-store-exp">₱${pln(grand.store)}</td><td class="ds-kai-exp">₱${pln(grand.kaimono)}</td>
+    <td class="ds-ncd">₱${pln(grand.ncd)}</td><td class="ds-net-sales">₱${pln(grand.totalExp)}</td>
+    <td><span class="ds-tag">${grand.count} total</span></td><td></td>
+  </tr>`;
+}
+
+// Build a single read-mode summary row
+function dsSummaryRowHtml(d, g){
+  const lock = adminUnlocked ? '' : '🔒 ';
+  return `
+    <td class="ds-date">${fmtDate(d)}</td>
+    <td class="ds-am-cash  ds-edit-cell" onclick="dsCellEdit(this,'${d}','amCash')" title="Click to edit">₱${pln(g.amCash)}</td>
+    <td class="ds-am-card  ds-edit-cell" onclick="dsCellEdit(this,'${d}','amCard')" title="Click to edit">₱${pln(g.amCard)}</td>
+    <td class="ds-am-gcash ds-edit-cell" onclick="dsCellEdit(this,'${d}','amGcash')" title="Click to edit">₱${pln(g.amGcash)}</td>
+    <td class="ds-am-total">₱${pln(g.amTotal)}</td>
+    <td class="ds-pm-cash  ds-edit-cell" onclick="dsCellEdit(this,'${d}','pmCash')" title="Click to edit">₱${pln(g.pmCash)}</td>
+    <td class="ds-pm-card  ds-edit-cell" onclick="dsCellEdit(this,'${d}','pmCard')" title="Click to edit">₱${pln(g.pmCard)}</td>
+    <td class="ds-pm-gcash ds-edit-cell" onclick="dsCellEdit(this,'${d}','pmGcash')" title="Click to edit">₱${pln(g.pmGcash)}</td>
+    <td class="ds-pm-total">₱${pln(g.pmTotal)}</td>
+    <td class="ds-gross">₱${pln(g.gross)}</td>
+    <td class="ds-net-sales">₱${pln(g.netSales)}</td>
+    <td class="ds-am-sc">₱${pln(g.amSc)}</td>
+    <td class="ds-pm-sc">₱${pln(g.pmSc)}</td>
+    <td class="ds-total-sc">₱${pln(g.totalSc)}</td>
+    <td class="ds-store-exp ds-edit-cell" onclick="dsCellEdit(this,'${d}','store')" title="Click to edit">₱${pln(g.store)}</td>
+    <td class="ds-kai-exp  ds-edit-cell" onclick="dsCellEdit(this,'${d}','kaimono')" title="Click to edit">₱${pln(g.kaimono)}</td>
+    <td class="ds-ncd">₱${pln(g.ncd)}</td>
+    <td class="ds-net-sales">₱${pln(g.totalExp)}</td>
+    <td><span class="ds-tag">${g.count} record${g.count>1?'s':''}</span></td>
+    <td class="ds-act">
+      <div class="ds-row-actions">
+        <button class="btn-ds-edit" onclick="dsEditRow('${d}')">✏️ Edit Row</button>
+        <button class="btn-del-date" onclick="requireAdminAction('deleteDate',${JSON.stringify(d)})" title="Delete all records for this date">${lock}Delete</button>
+      </div>
+    </td>`;
+}
+
+// Click a single cell → inline mini-edit
+function dsCellEdit(td, date, field){
+  if(td.querySelector('input')) return; // already editing
+  const curText = td.textContent.replace('₱','').replace(/,/g,'').trim();
+  const orig = td.innerHTML;
+  td.innerHTML = `<input class="ds-cell-input" type="number" min="0" step="0.01" value="${curText}" onblur="dsCellSave(this,'${date}','${field}','${encodeURIComponent(orig)}')" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.closest('td').innerHTML=decodeURIComponent('${encodeURIComponent(orig)}');}" autofocus>`;
+  td.querySelector('input').select();
+}
+
+// Commit a single-cell edit back to the underlying records
+function dsCellSave(input, date, field, origEncoded){
+  const val = nonNegativeMoney(parseFloat(input.value)||0);
+  const td = input.closest('td');
+  // Map field → which shift + property
+  const fieldMap = {
+    amCash:{shift:'am',prop:'cash'}, amCard:{shift:'am',prop:'card'}, amGcash:{shift:'am',prop:'gcash'},
+    pmCash:{shift:'pm',prop:'cash'}, pmCard:{shift:'pm',prop:'card'}, pmGcash:{shift:'pm',prop:'gcash'},
+    store:{prop:'store'}, kaimono:{prop:'kaimono'}
+  };
+  const mapping = fieldMap[field];
+  if(!mapping){ td.innerHTML=decodeURIComponent(origEncoded); return; }
+
+  // Apply delta proportionally across all records for this date
+  const recs = records.filter(r=>r.date===date);
+  if(!recs.length){ td.innerHTML=decodeURIComponent(origEncoded); return; }
+
+  // Calculate current total for this field across records for the date
+  let curTotal = 0;
+  recs.forEach(r=>{ curTotal += mapping.shift ? cleanNumber(r[mapping.shift][mapping.prop]) : cleanNumber(r.expenses[mapping.prop]); });
+  curTotal = roundMoney(curTotal);
+
+  const delta = roundMoney(val - curTotal);
+  // Distribute delta to the first record only (simplest safe approach)
+  const target = recs[0];
+  if(mapping.shift){
+    target[mapping.shift][mapping.prop] = nonNegativeMoney(cleanNumber(target[mapping.shift][mapping.prop]) + delta);
+    normalizeRecord(target);
+  } else {
+    target.expenses[mapping.prop] = nonNegativeMoney(cleanNumber(target.expenses[mapping.prop]) + delta);
+    normalizeRecord(target);
+  }
+  appendTransaction('Edited (Summary)', target);
+  save();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('✅','Summary updated!');
+}
+
+// Edit entire row inline (all editable fields at once)
+function dsEditRow(date){
+  const tr = document.getElementById(`dsrow_${date}`);
+  if(!tr) return;
+  // Collect current grouped values from records
+  const norm = getNorm();
+  const recs = norm.filter(r=>r.date===date);
+  if(!recs.length) return;
+  const g = {amCash:0,amCard:0,amGcash:0,pmCash:0,pmCard:0,pmGcash:0,store:0,kaimono:0};
+  recs.forEach(r=>{
+    g.amCash=roundMoney(g.amCash+r.am.cash); g.amCard=roundMoney(g.amCard+r.am.card); g.amGcash=roundMoney(g.amGcash+r.am.gcash);
+    g.pmCash=roundMoney(g.pmCash+r.pm.cash); g.pmCard=roundMoney(g.pmCard+r.pm.card); g.pmGcash=roundMoney(g.pmGcash+r.pm.gcash);
+    g.store=roundMoney(g.store+r.expenses.store); g.kaimono=roundMoney(g.kaimono+r.expenses.kaimono);
+  });
+  const inp = f=>`<input class="ds-cell-input" id="dse_${date}_${f}" type="number" min="0" step="0.01" value="${g[f]}" style="width:82px">`;
+  tr.classList.add('ds-editing');
+  tr.innerHTML=`
+    <td class="ds-date" style="font-weight:800;">${fmtDate(date)}</td>
+    <td class="ds-am-cash">${inp('amCash')}</td><td class="ds-am-card">${inp('amCard')}</td><td class="ds-am-gcash">${inp('amGcash')}</td><td class="ds-am-total" id="dse_${date}_amTotal" style="color:var(--am);font-weight:900;">—</td>
+    <td class="ds-pm-cash">${inp('pmCash')}</td><td class="ds-pm-card">${inp('pmCard')}</td><td class="ds-pm-gcash">${inp('pmGcash')}</td><td class="ds-pm-total" id="dse_${date}_pmTotal" style="color:var(--pm);font-weight:900;">—</td>
+    <td class="ds-gross" id="dse_${date}_gross">—</td><td class="ds-net-sales" id="dse_${date}_net">—</td>
+    <td class="ds-am-sc" id="dse_${date}_amSc">—</td><td class="ds-pm-sc" id="dse_${date}_pmSc">—</td><td class="ds-total-sc" id="dse_${date}_totalSc">—</td>
+    <td class="ds-store-exp">${inp('store')}</td><td class="ds-kai-exp">${inp('kaimono')}</td>
+    <td class="ds-ncd" id="dse_${date}_ncd">—</td><td id="dse_${date}_totalExp">—</td>
+    <td><span class="ds-tag">${recs.length} rec.</span></td>
+    <td class="ds-act"><div class="ds-row-actions">
+      <button class="btn-ds-save" onclick="dsRowSave('${date}')">💾 Save</button>
+      <button class="btn-ds-cancel" onclick="renderDailySummary()">Cancel</button>
+    </div></td>`;
+  // Wire live preview
+  ['amCash','amCard','amGcash','pmCash','pmCard','pmGcash','store','kaimono'].forEach(f=>{
+    const el = document.getElementById(`dse_${date}_${f}`);
+    if(el) el.addEventListener('input',()=>dsRowLivePreview(date));
+  });
+  dsRowLivePreview(date);
+}
+
+function dsRowLivePreview(date){
+  const gv2 = f=>{ const el=document.getElementById(`dse_${date}_${f}`); return el?cleanNumber(el.value):0; };
+  const amF = shiftFormula(gv2('amCash'),gv2('amCard'),gv2('amGcash'),0);
+  const pmF = shiftFormula(gv2('pmCash'),gv2('pmCard'),gv2('pmGcash'),0);
+  const tots = reportFormula(
+    {cash:gv2('amCash'),total:amF.total,sc:amF.sc},
+    {cash:gv2('pmCash'),total:pmF.total,sc:pmF.sc},
+    {store:gv2('store'),kaimono:gv2('kaimono')}
+  );
+  const setText2=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent='₱'+pln(v); };
+  setText2(`dse_${date}_amTotal`, amF.total);
+  setText2(`dse_${date}_pmTotal`, pmF.total);
+  setText2(`dse_${date}_gross`,   tots.grand);
+  setText2(`dse_${date}_net`,     tots.net);
+  setText2(`dse_${date}_amSc`,    amF.sc);
+  setText2(`dse_${date}_pmSc`,    pmF.sc);
+  setText2(`dse_${date}_totalSc`, tots.totalSc);
+  setText2(`dse_${date}_ncd`,     tots.netCashDeposit);
+  setText2(`dse_${date}_totalExp`,tots.expenses.total);
+}
+
+function dsRowSave(date){
+  const gv2 = f=>{ const el=document.getElementById(`dse_${date}_${f}`); return el?cleanNumber(el.value):0; };
+  const recs = records.filter(r=>r.date===date);
+  if(!recs.length){ renderDailySummary(); return; }
+
+  // Calculate current group totals
+  const cur = {amCash:0,amCard:0,amGcash:0,pmCash:0,pmCard:0,pmGcash:0,store:0,kaimono:0};
+  recs.forEach(r=>{
+    cur.amCash=roundMoney(cur.amCash+r.am.cash); cur.amCard=roundMoney(cur.amCard+r.am.card); cur.amGcash=roundMoney(cur.amGcash+r.am.gcash);
+    cur.pmCash=roundMoney(cur.pmCash+r.pm.cash); cur.pmCard=roundMoney(cur.pmCard+r.pm.card); cur.pmGcash=roundMoney(cur.pmGcash+r.pm.gcash);
+    cur.store=roundMoney(cur.store+r.expenses.store); cur.kaimono=roundMoney(cur.kaimono+r.expenses.kaimono);
+  });
+
+  // Apply delta to first record
+  const t = recs[0];
+  ['amCash','amCard','amGcash'].forEach(f=>{
+    const prop = f.replace('am','').toLowerCase();
+    const delta = roundMoney(gv2(f) - cur[f]);
+    t.am[prop] = nonNegativeMoney(t.am[prop] + delta);
+  });
+  ['pmCash','pmCard','pmGcash'].forEach(f=>{
+    const prop = f.replace('pm','').toLowerCase();
+    const delta = roundMoney(gv2(f) - cur[f]);
+    t.pm[prop] = nonNegativeMoney(t.pm[prop] + delta);
+  });
+  const storeDelta = roundMoney(gv2('store') - cur.store);
+  const kaimDelta  = roundMoney(gv2('kaimono') - cur.kaimono);
+  t.expenses.store   = nonNegativeMoney(t.expenses.store   + storeDelta);
+  t.expenses.kaimono = nonNegativeMoney(t.expenses.kaimono + kaimDelta);
+  normalizeRecord(t);
+  appendTransaction('Edited (Summary Row)', t);
+  save();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('✅','Daily summary row saved!');
+}
+
+function exportDailySummaryCSV(){
+  if(!records.length){ toast('⚠️','No records to export.','warn'); return; }
+  const norm = getNorm();
+  const grouped = {};
+  norm.forEach(r=>{
+    if(!grouped[r.date]) grouped[r.date]={amCash:0,amCard:0,amGcash:0,amTotal:0,amSc:0,pmCash:0,pmCard:0,pmGcash:0,pmTotal:0,pmSc:0,gross:0,netSales:0,totalSc:0,store:0,kaimono:0,totalExp:0,ncd:0,count:0};
+    const g=grouped[r.date];
+    g.amCash=roundMoney(g.amCash+r.am.cash); g.amCard=roundMoney(g.amCard+r.am.card); g.amGcash=roundMoney(g.amGcash+r.am.gcash); g.amTotal=roundMoney(g.amTotal+r.am.total); g.amSc=roundMoney(g.amSc+r.am.sc);
+    g.pmCash=roundMoney(g.pmCash+r.pm.cash); g.pmCard=roundMoney(g.pmCard+r.pm.card); g.pmGcash=roundMoney(g.pmGcash+r.pm.gcash); g.pmTotal=roundMoney(g.pmTotal+r.pm.total); g.pmSc=roundMoney(g.pmSc+r.pm.sc);
+    g.gross=roundMoney(g.gross+r.grand); g.netSales=roundMoney(g.netSales+r.net); g.totalSc=roundMoney(g.totalSc+r.am.sc+r.pm.sc);
+    g.store=roundMoney(g.store+r.expenses.store); g.kaimono=roundMoney(g.kaimono+r.expenses.kaimono); g.totalExp=roundMoney(g.totalExp+r.expenses.total);
+    g.ncd=roundMoney(g.ncd+(r.netCashDeposit||0)); g.count++;
+  });
+  const dates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+  const hdr=['Date','AM Cash','AM Card','AM GCash','AM Total','AM Svc Charge','PM Cash','PM Card','PM GCash','PM Total','PM Svc Charge','Gross Sales','Net Sales','Total Svc Charge','Store Expenses','Kaimono Expenses','Total Expenses','Net Cash Deposit','Records'];
+  const rows=dates.map(d=>{const g=grouped[d];return[d,g.amCash,g.amCard,g.amGcash,g.amTotal,g.amSc,g.pmCash,g.pmCard,g.pmGcash,g.pmTotal,g.pmSc,g.gross,g.netSales,g.totalSc,g.store,g.kaimono,g.totalExp,g.ncd,g.count].map((v,i)=>i>0&&i<18?Number(v).toFixed(2):v).join(',');});
+  const csv=[hdr.join(','),...rows].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download=`daily_summary_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📤','Daily summary exported!');
+}
+
+// Pagination renderer
+function renderPagination(key, total, currentPage, onPageChange){
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const pgEl  = document.getElementById(key+'Pagination');
+  const info  = document.getElementById(key+'PageInfo');
+  const btns  = document.getElementById(key+'PageBtns');
+  if(!pgEl) return;
+  if(pages <= 1){ pgEl.style.display='none'; return; }
+  pgEl.style.display='flex';
+  const start = currentPage * PAGE_SIZE + 1;
+  const end   = Math.min((currentPage+1)*PAGE_SIZE, total);
+  info.textContent = `Showing ${start}–${end} of ${total}`;
+  let html = `<button class="pg-btn" ${currentPage===0?'disabled':''} onclick="(${onPageChange.toString()})(${currentPage-1})">‹ Prev</button>`;
+  const maxBtns = 5, half = Math.floor(maxBtns/2);
+  let lo = Math.max(0, currentPage-half), hi = Math.min(pages-1, lo+maxBtns-1);
+  if(hi-lo < maxBtns-1) lo = Math.max(0, hi-maxBtns+1);
+  for(let p=lo; p<=hi; p++) html += `<button class="pg-btn${p===currentPage?' active':''}" onclick="(${onPageChange.toString()})(${p})">${p+1}</button>`;
+  html += `<button class="pg-btn" ${currentPage>=pages-1?'disabled':''} onclick="(${onPageChange.toString()})(${currentPage+1})">Next ›</button>`;
+  btns.innerHTML = html;
+}
+
+//  Render History 
+function renderHistory(){
+  invalidateCache();
+  const norm  = getNorm();
+  records     = norm.map(r=>JSON.parse(JSON.stringify(r))); // keep records in sync
+  const tbody = document.getElementById('histBody');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('stat_count').textContent = norm.length;
+  if(!norm.length){
+    tbody.innerHTML=''; empty.style.display='block';
+    document.getElementById('histMeta').textContent='No records yet';
+    document.getElementById('histPagination').style.display='none'; return;
+  }
+  empty.style.display='none';
+  document.getElementById('histMeta').textContent=`${norm.length} record${norm.length>1?'s':''} saved`;
+  histPage = Math.min(histPage, Math.max(0, Math.ceil(norm.length/PAGE_SIZE)-1));
+  const start = histPage * PAGE_SIZE, slice = norm.slice(start, start+PAGE_SIZE);
+  const frag = document.createDocumentFragment();
+  slice.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.id = `row_${r.id}`;
+    tr.innerHTML = `<td class="td-date">${fmtDate(r.date)}</td><td>₱${pln(r.am.cash)}</td><td>₱${pln(r.am.card)}</td><td>₱${pln(r.am.gcash)}</td><td class="td-am">₱${pln(r.am.total)}</td><td>${r.am.tables}</td><td>${r.am.guests}</td><td>₱${pln(r.am.sc)}</td><td><span class="ctag am">${r.am.cashier}</span></td><td>₱${pln(r.pm.cash)}</td><td>₱${pln(r.pm.card)}</td><td>₱${pln(r.pm.gcash)}</td><td class="td-pm">₱${pln(r.pm.total)}</td><td>${r.pm.tables}</td><td>${r.pm.guests}</td><td>₱${pln(r.pm.sc)}</td><td><span class="ctag pm">${r.pm.cashier}</span></td><td class="td-grand">₱${pln(r.grand)}</td><td>₱${pln(r.expenses.store)}</td><td>₱${pln(r.expenses.kaimono)}</td><td>₱${pln(r.expenses.total)}</td><td class="td-grand">₱${pln(r.net)}</td><td style="color:#1565c0;font-weight:900;font-size:14px;">₱${pln(r.netCashDeposit||0)}</td><td><div class="row-btns"><button class="btn-edit" onclick="requireAdminAction('edit',${r.id})">Admin Edit</button><button class="btn-del" onclick="requireAdminAction('delete',${r.id})">Admin Delete</button></div></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.innerHTML=''; tbody.appendChild(frag);
+  renderPagination('hist', norm.length, histPage, p=>{ histPage=p; renderHistory(); });
+}
+
+
+//  Stats (based on selected date) 
+function updateStats(){
+  const d = document.getElementById('reportDate').value;
+  const norm = getNorm();
+  const recs = norm.filter(r=>r.date===d);
+  const amT  = roundMoney(recs.reduce((a,r)=>a+r.am.total,0));
+  const pmT  = roundMoney(recs.reduce((a,r)=>a+r.pm.total,0));
+  const expT = roundMoney(recs.reduce((a,r)=>a+r.expenses.total,0));
+  const netT = roundMoney(amT + pmT - expT);
+  const ncdT = roundMoney(recs.reduce((a,r)=>a+(r.netCashDeposit||0),0));
+  document.getElementById('stat_am').textContent    = fmt(amT);
+  document.getElementById('stat_pm').textContent    = fmt(pmT);
+  document.getElementById('stat_grand').textContent = fmt(amT+pmT);
+  document.getElementById('stat_expenses').textContent = fmt(expT);
+  document.getElementById('stat_net').textContent = fmt(netT);
+  document.getElementById('stat_ncd').textContent = fmt(ncdT);
+}
+document.getElementById('reportDate').addEventListener('change', ()=>{
+  updateStats();
+  // Always keep SSR date in sync with report date
+  const ssrEl = document.getElementById('ssrDate');
+  if(ssrEl){
+    ssrEl.value = document.getElementById('reportDate').value;
+    const lbl = document.getElementById('ssrDateLabel');
+    if(lbl) lbl.style.color = 'var(--am)';
+  }
+  renderSSR();
+});
+
+//  Edit row 
+function editRow(id){
+  if(!adminUnlocked){ requireAdminAction('edit', id); return; }
+  const idx = records.findIndex(r=>r.id===id);
+  if(idx<0) return;
+  const r  = records[idx];
+  const tr = document.getElementById(`row_${id}`);
+  const cOpts  = cashiers.map(c=>`<option${c===r.am.cashier?' selected':''}>${c}</option>`).join('');
+  const cOptsP = cashiers.map(c=>`<option${c===r.pm.cashier?' selected':''}>${c}</option>`).join('');
+
+  tr.innerHTML=`
+    <td><input class="ei" id="e_date" type="date" value="${r.date}" style="width:130px"></td>
+    <td><input class="ei" id="e_am_cash"  type="number" value="${r.am.cash}"></td>
+    <td><input class="ei" id="e_am_card"  type="number" value="${r.am.card}"></td>
+    <td><input class="ei" id="e_am_gcash" type="number" value="${r.am.gcash}"></td>
+    <td class="td-am" id="e_am_t">₱${pln(r.am.total)}</td>
+    <td><input class="ei" id="e_am_tables" type="number" min="0" value="${r.am.tables}" style="width:58px"></td>
+    <td><input class="ei" id="e_am_guests" type="number" value="${r.am.guests}" style="width:58px"></td>
+    <td id="e_am_sc">₱${pln(r.am.sc)}</td>
+    <td><select class="es" id="e_am_c"><option value="">Select</option>${cOpts}</select></td>
+    <td><input class="ei" id="e_pm_cash"  type="number" value="${r.pm.cash}"></td>
+    <td><input class="ei" id="e_pm_card"  type="number" value="${r.pm.card}"></td>
+    <td><input class="ei" id="e_pm_gcash" type="number" value="${r.pm.gcash}"></td>
+    <td class="td-pm" id="e_pm_t">₱${pln(r.pm.total)}</td>
+    <td><input class="ei" id="e_pm_tables" type="number" min="0" value="${r.pm.tables}" style="width:58px"></td>
+    <td><input class="ei" id="e_pm_guests" type="number" value="${r.pm.guests}" style="width:58px"></td>
+    <td id="e_pm_sc">₱${pln(r.pm.sc)}</td>
+    <td><select class="es" id="e_pm_c"><option value="">Select</option>${cOptsP}</select></td>
+    <td class="td-grand" id="e_grand">₱${pln(r.grand)}</td>
+    <td><input class="ei" id="e_store_expenses" type="number" value="${r.expenses.store}"></td>
+    <td><input class="ei" id="e_kaimono_expenses" type="number" value="${r.expenses.kaimono}"></td>
+    <td id="e_expenses">₱${pln(r.expenses.total)}</td>
+    <td class="td-grand" id="e_net">₱${pln(r.net)}</td>
+    <td style="color:#1565c0;font-weight:900;" id="e_ncd">₱${pln(r.netCashDeposit||0)}</td>
+    <td><div class="row-btns">
+      <button class="btn-save"   onclick="saveRow(${id})">Save</button>
+      <button class="btn-cancel" onclick="renderHistory()">Cancel</button>
+    </div></td>`;
+
+  ['e_am_cash','e_am_card','e_am_gcash','e_am_guests','e_pm_cash','e_pm_card','e_pm_gcash','e_pm_guests','e_store_expenses','e_kaimono_expenses']
+    .forEach(f=>document.getElementById(f).addEventListener('input',liveEdit));
+}
+
+
+function liveEdit(){
+  const am = shiftFormula(ev('e_am_cash'), ev('e_am_card'), ev('e_am_gcash'), ev('e_am_guests'));
+  const pm = shiftFormula(ev('e_pm_cash'), ev('e_pm_card'), ev('e_pm_gcash'), ev('e_pm_guests'));
+  document.getElementById('e_am_t').textContent  = '₱'+pln(am.total);
+  document.getElementById('e_pm_t').textContent  = '₱'+pln(pm.total);
+  document.getElementById('e_am_sc').textContent = '₱'+pln(am.sc);
+  document.getElementById('e_pm_sc').textContent = '₱'+pln(pm.sc);
+  const totals = reportFormula(
+    { cash:ev('e_am_cash'), total:am.total, sc:am.sc },
+    { cash:ev('e_pm_cash'), total:pm.total, sc:pm.sc },
+    { store:ev('e_store_expenses'), kaimono:ev('e_kaimono_expenses') }
+  );
+  document.getElementById('e_grand').textContent = '₱'+pln(totals.grand);
+  document.getElementById('e_expenses').textContent = '₱'+pln(totals.expenses.total);
+  document.getElementById('e_net').textContent = '₱'+pln(totals.net);
+  document.getElementById('e_ncd').textContent = '₱'+pln(totals.netCashDeposit);
+}
+
+function saveRow(id){
+  if(!adminUnlocked){ toast('🔒','Admin password required to save edits.','warn'); return; }
+  const idx = records.findIndex(r=>r.id===id);
+  if(idx<0) return;
+  const r = records[idx];
+  r.date = document.getElementById('e_date').value || r.date;
+  const editIds = ['e_am_cash','e_am_card','e_am_gcash','e_am_tables','e_am_guests','e_pm_cash','e_pm_card','e_pm_gcash','e_pm_tables','e_pm_guests','e_store_expenses','e_kaimono_expenses'];
+  if(hasNegativeInput(editIds)){ toast('⚠️','Amounts, tables, and guests cannot be negative.','warn'); return; }
+  r.am.cash=nonNegativeMoney(ev('e_am_cash')); r.am.card=nonNegativeMoney(ev('e_am_card')); r.am.gcash=nonNegativeMoney(ev('e_am_gcash'));
+  r.pm.cash=nonNegativeMoney(ev('e_pm_cash')); r.pm.card=nonNegativeMoney(ev('e_pm_card')); r.pm.gcash=nonNegativeMoney(ev('e_pm_gcash'));
+  r.am.tables=nonNegativeInt(ev('e_am_tables')); r.pm.tables=nonNegativeInt(ev('e_pm_tables'));
+  r.am.guests=nonNegativeInt(ev('e_am_guests')); r.pm.guests=nonNegativeInt(ev('e_pm_guests'));
+  r.am.cashier=document.getElementById('e_am_c').value;
+  r.pm.cashier=document.getElementById('e_pm_c').value;
+  if(shiftHasEntry(r.am) && !r.am.cashier){ toast('⚠️','Please assign an AM cashier.','warn'); return; }
+  if(shiftHasEntry(r.pm) && !r.pm.cashier){ toast('⚠️','Please assign a PM cashier.','warn'); return; }
+  r.expenses = { store:ev('e_store_expenses'), kaimono:ev('e_kaimono_expenses') };
+  normalizeRecord(r);
+  appendTransaction('Edited', r);
+  save();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('✅','Record updated successfully!');
+}
+
+function deleteRow(id){
+  if(!adminUnlocked){ requireAdminAction('delete', id); return; }
+  if(!confirm('Delete this record permanently?')) return;
+  const deleted = records.find(r=>r.id===id);
+  if(deleted) appendTransaction('Deleted', deleted);
+  records=records.filter(r=>r.id!==id);
+  save();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('🗑️','Record deleted.','warn');
+}
+
+//  Admin 
+function openAdmin(action='', id=null){
+  pendingAdminAction = action ? { action, id } : null;
+  document.getElementById('adminPw').value='';
+  document.getElementById('adminErr').style.display='none';
+  document.getElementById('adminModal').classList.add('open');
+  setTimeout(()=>document.getElementById('adminPw').focus(),120);
+}
+function closeAdmin(){ document.getElementById('adminModal').classList.remove('open'); pendingAdminAction=null; }
+function dispatchAdminAction(action, id){
+  if(action==='edit')             editRow(id);
+  else if(action==='delete')      deleteRow(id);
+  else if(action==='deleteDate')  deleteAllRecordsForDate(id);
+  else if(action==='deleteTx')    deleteTransaction(id);
+  else if(action==='clearAllTx')  clearAllTransactions();
+  else if(action==='clearAllRecords') clearAllRecords();
+}
+function requireAdminAction(action, id){
+  if(adminUnlocked){ dispatchAdminAction(action, id); return; }
+  openAdmin(action, id);
+}
+function verifyAdmin(){
+  if(document.getElementById('adminPw').value===adminPwd){
+    adminUnlocked = true;
+    const action = pendingAdminAction;
+    closeAdmin();
+    if(action){ dispatchAdminAction(action.action, action.id); return; }
+    setValue('set_appTitle', appSettings.appTitle);
+    setValue('set_appSubtitle', appSettings.appSubtitle);
+    setValue('set_entryTitle', appSettings.entryTitle);
+    setValue('set_historyTitle', appSettings.historyTitle);
+    setValue('set_amName', appSettings.amName);
+    setValue('set_pmName', appSettings.pmName);
+    setValue('set_paymentLabels', `${appSettings.payment1}, ${appSettings.payment2}, ${appSettings.payment3}`);
+    setValue('set_expenseLabels', `${appSettings.storeExpenseLabel}, ${appSettings.kaimonoExpenseLabel}`);
+    document.getElementById('cashierList').value=cashiers.join('\n');
+    document.getElementById('scRate').value=scRate;
+    document.getElementById('newPw').value='';
+    document.getElementById('settingsModal').classList.add('open');
+  } else {
+    document.getElementById('adminErr').style.display='block';
+    document.getElementById('adminPw').value='';
+    document.getElementById('adminPw').focus();
+  }
+}
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings(){
+  const lines=document.getElementById('cashierList').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length){ alert('Add at least one cashier name.'); return; }
+  const payments = paymentLabelsFromInput();
+  const expenseLabels = expenseLabelsFromInput();
+  cashiers=lines;
+  scRate=cleanNumber(document.getElementById('scRate').value);
+  if(scRate < 0) scRate = 0;
+  appSettings = {
+    ...appSettings,
+    appTitle:labelText(document.getElementById('set_appTitle').value) || defaultSettings.appTitle,
+    appSubtitle:labelText(document.getElementById('set_appSubtitle').value) || defaultSettings.appSubtitle,
+    entryTitle:labelText(document.getElementById('set_entryTitle').value) || defaultSettings.entryTitle,
+    historyTitle:labelText(document.getElementById('set_historyTitle').value) || defaultSettings.historyTitle,
+    historyHeading:labelText(document.getElementById('set_historyTitle').value) || defaultSettings.historyHeading,
+    amName:labelText(document.getElementById('set_amName').value) || defaultSettings.amName,
+    pmName:labelText(document.getElementById('set_pmName').value) || defaultSettings.pmName,
+    payment1:payments[0], payment2:payments[1], payment3:payments[2],
+    storeExpenseLabel:expenseLabels[0], kaimonoExpenseLabel:expenseLabels[1]
+  };
+  const np=document.getElementById('newPw').value.trim();
+  if(np) adminPwd=np;
+  localStorage.setItem('sr_cashiers',JSON.stringify(cashiers));
+  localStorage.setItem('sr_scrate',String(scRate));
+  localStorage.setItem('sr_settings',JSON.stringify(appSettings));
+  normalizeRecords();
+  localStorage.setItem('sr_adminpwd',adminPwd);
+  applySettings(); populateCashiers(); ['am','pm'].forEach(s=>calc(s));
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  closeSettings(); toast('✅','Settings saved!');
+}
+
+
+//  Delete ALL records for a given date (Admin only)
+function deleteAllRecordsForDate(date){
+  if(!adminUnlocked){ requireAdminAction('deleteDate', date); return; }
+  const matching = records.filter(r => r.date === date);
+  if(!matching.length){ toast('⚠️','No records found for that date.','warn'); return; }
+  if(!confirm(`Delete ALL ${matching.length} record${matching.length>1?'s':''} for ${date}?\n\nThis cannot be undone.`)) return;
+  matching.forEach(r => appendTransaction('Deleted', r));
+  records = records.filter(r => r.date !== date);
+  save();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield);
+  toast('🗑️', `${matching.length} record${matching.length>1?'s':''} for ${date} deleted.`, 'warn');
+}
+
+//  Delete a single transaction log entry (Admin only)
+function deleteTransaction(txId){
+  if(!adminUnlocked){ requireAdminAction('deleteTx', txId); return; }
+  if(!confirm('Delete this transaction log entry permanently?')) return;
+  transactions = transactions.filter(t => t.id !== txId);
+  saveTransactions();
+  scheduleRender(renderTransactions, updateShield);
+  toast('🗑️', 'Transaction entry removed.', 'warn');
+}
+
+//  Clear ALL transaction history (Admin only)
+function clearAllTransactions(){
+  if(!adminUnlocked){ requireAdminAction('clearAllTx', null); return; }
+  if(!transactions.length){ toast('⚠️','No transaction history to clear.','warn'); return; }
+  if(!confirm(`Clear ALL ${transactions.length} transaction log entries permanently?\n\nThis cannot be undone.`)) return;
+  transactions = [];
+  saveTransactions();
+  scheduleRender(renderTransactions, updateShield);
+  toast('🗑️', 'All transaction history cleared.', 'warn');
+}
+
+//  Clear ALL sales records (Admin only)
+function clearAllRecords(){
+  if(!adminUnlocked){ requireAdminAction('clearAllRecords', null); return; }
+  if(!records.length){ toast('⚠️','No sales history to clear.','warn'); return; }
+  const count = records.length;
+  const confirmed = confirm(
+    `⚠️ CLEAR ALL SALES HISTORY\n\n` +
+    `You are about to permanently delete ALL ${count} sales record${count>1?'s':''}.\n\n` +
+    `This action CANNOT be undone.\n\n` +
+    `Type OK to confirm.`
+  );
+  if(!confirmed) return;
+  // Log the wipe to transaction history before deleting
+  appendTransaction('CLEARED ALL RECORDS', {
+    date: new Date().toISOString().slice(0,10),
+    am:{ total:0, cash:0, sc:0 }, pm:{ total:0, cash:0, sc:0 },
+    grand:0, net:0, expenses:{ store:0, kaimono:0, total:0 }, netCashDeposit:0
+  });
+  records = [];
+  _normCache = null;
+  save();
+  saveTransactions();
+  scheduleRender(renderHistory, renderDailySummary, renderTransactions, updateStats, updateShield, renderSSR);
+  toast('🗑️', `All ${count} sales record${count>1?'s':''} cleared.`, 'warn');
+}
+
+//  Excel Report 
+function excelXml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+function excelCell(value, type='String', style=''){
+  const clean = value ?? '';
+  const isNumber = type === 'Number' && clean !== '' && Number.isFinite(Number(clean));
+  const dataType = isNumber ? 'Number' : 'String';
+  const dataValue = isNumber ? Number(clean) : clean;
+  return `<Cell${style ? ` ss:StyleID="${style}"` : ''}><Data ss:Type="${dataType}">${excelXml(dataValue)}</Data></Cell>`;
+}
+function excelRow(values, style=''){
+  return `<Row>${values.map(v => Array.isArray(v) ? excelCell(v[0], v[1] || 'String', v[2] || style) : excelCell(v, 'String', style)).join('')}</Row>`;
+}
+function excelSheet(name, rows){
+  return `<Worksheet ss:Name="${excelXml(name).slice(0,31)}"><Table>${rows.join('')}</Table></Worksheet>`;
+}
+function dailySummaryRowsForExport(norm){
+  const grouped = {};
+  norm.forEach(r=>{
+    if(!grouped[r.date]) grouped[r.date]={ gcash:0, card:0, amSc:0, pmSc:0, totalSc:0, store:0, kaimono:0, ncd:0, count:0 };
+    const g = grouped[r.date];
+    g.gcash   = roundMoney(g.gcash   + r.am.gcash + r.pm.gcash);
+    g.card    = roundMoney(g.card    + r.am.card  + r.pm.card);
+    g.amSc    = roundMoney(g.amSc    + r.am.sc);
+    g.pmSc    = roundMoney(g.pmSc    + r.pm.sc);
+    g.totalSc = roundMoney(g.totalSc + r.am.sc + r.pm.sc);
+    g.store   = roundMoney(g.store   + r.expenses.store);
+    g.kaimono = roundMoney(g.kaimono + r.expenses.kaimono);
+    g.ncd     = roundMoney(g.ncd     + (r.netCashDeposit||0));
+    g.count++;
+  });
+  return Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date => ({ date, ...grouped[date] }));
+}
+function downloadTextFile(filename, mime, content){
+  const blob = new Blob([content], { type:mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+function exportExcelWorkbook(source='manual'){
+  if(!records.length && !transactions.length){ toast('⚠️','No data to export to Excel.','warn'); return; }
+  const norm = getNorm();
+  const summary = dailySummaryRowsForExport(norm);
+  const totals = norm.reduce((acc,r)=>{
+    acc.am += r.am.total; acc.pm += r.pm.total; acc.gross += r.grand; acc.exp += r.expenses.total; acc.net += r.net; acc.ncd += r.netCashDeposit || 0; return acc;
+  }, {am:0, pm:0, gross:0, exp:0, net:0, ncd:0});
+  Object.keys(totals).forEach(k=>totals[k]=roundMoney(totals[k]));
+  const s = appSettings;
+  const generated = new Date().toLocaleString('en-PH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const workbook = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Title"><Font ss:Bold="1" ss:Size="14"/><Interior ss:Color="#E8F5E9" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="Head"><Font ss:Bold="1"/><Interior ss:Color="#F1F3F4" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="Money"><NumberFormat ss:Format="&quot;PHP&quot; #,##0.00"/></Style>
+ </Styles>
+ ${excelSheet('How to Read This File', [
+   excelRow(['Kagaribi Sales Data Report'], 'Title'),
+   excelRow(['Generated', generated]),
+   excelRow(['Purpose', source === 'restore' ? 'Created automatically after restoring backup data.' : 'Created from current saved data.']),
+   excelRow(['Sheets included', 'Daily Summary, Detailed Records, Transaction History']),
+   excelRow(['Gross Sales', 'AM Total + PM Total']),
+   excelRow(['Service Charge', 'Service charge is computed from VAT-exclusive sales: sales / 1.12 x service charge rate.']),
+   excelRow(['Net Sales', 'Gross Sales - Store Expenses - Kaimono Expenses']),
+   excelRow(['Net Cash Deposit', 'Cash Sales - Service Charge - Total Expenses']),
+   excelRow(['Note', 'The JSON backup is for restoring the app. This Excel file is for reading, checking, printing, and sharing.'])
+ ])}
+ ${excelSheet('Daily Summary', [
+   excelRow(['Date','GCash Sales','Card Sales','AM Svc Charge','PM Svc Charge','Total Svc Charge','Store Expenses','Kaimono Expenses','Net Cash Deposit','Records'], 'Head'),
+   ...summary.map(g => excelRow([g.date,[g.gcash,'Number','Money'],[g.card,'Number','Money'],[g.amSc,'Number','Money'],[g.pmSc,'Number','Money'],[g.totalSc,'Number','Money'],[g.store,'Number','Money'],[g.kaimono,'Number','Money'],[g.ncd,'Number','Money'],[g.count,'Number']])),
+   excelRow(['ALL DAYS TOTAL',[summary.reduce((a,g)=>roundMoney(a+g.gcash),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.card),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.amSc),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.pmSc),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.totalSc),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.store),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.kaimono),0),'Number','Money'],[summary.reduce((a,g)=>roundMoney(a+g.ncd),0),'Number','Money'],[summary.reduce((a,g)=>a+g.count,0),'Number']], 'Head')
+ ])}
+ ${excelSheet('Detailed Records', [
+   excelRow(['Date',`${s.amPill} ${s.payment1}`,`${s.amPill} ${s.payment2}`,`${s.amPill} ${s.payment3}`,`${s.amPill} Total`,`${s.amPill} Tables`,`${s.amPill} Guests`,`${s.amPill} Service Charge`,`${s.amPill} Cashier`,`${s.pmPill} ${s.payment1}`,`${s.pmPill} ${s.payment2}`,`${s.pmPill} ${s.payment3}`,`${s.pmPill} Total`,`${s.pmPill} Tables`,`${s.pmPill} Guests`,`${s.pmPill} Service Charge`,`${s.pmPill} Cashier`,'Gross Sales',s.storeExpenseLabel,s.kaimonoExpenseLabel,s.totalExpensesLabel,s.netSalesLabel,'Net Cash Deposit'], 'Head'),
+   ...norm.map(r => excelRow([r.date,[r.am.cash,'Number','Money'],[r.am.card,'Number','Money'],[r.am.gcash,'Number','Money'],[r.am.total,'Number','Money'],[r.am.tables,'Number'],[r.am.guests,'Number'],[r.am.sc,'Number','Money'],r.am.cashier,[r.pm.cash,'Number','Money'],[r.pm.card,'Number','Money'],[r.pm.gcash,'Number','Money'],[r.pm.total,'Number','Money'],[r.pm.tables,'Number'],[r.pm.guests,'Number'],[r.pm.sc,'Number','Money'],r.pm.cashier,[r.grand,'Number','Money'],[r.expenses.store,'Number','Money'],[r.expenses.kaimono,'Number','Money'],[r.expenses.total,'Number','Money'],[r.net,'Number','Money'],[r.netCashDeposit||0,'Number','Money']])),
+   excelRow(['TOTAL','','','',[totals.am,'Number','Money'],'','','','','','','',[totals.pm,'Number','Money'],'','','','',[totals.gross,'Number','Money'],'','',[totals.exp,'Number','Money'],[totals.net,'Number','Money'],[totals.ncd,'Number','Money']], 'Head')
+ ])}
+ ${excelSheet('Transaction History', [
+   excelRow(['Timestamp','Action','Report Date','AM Total','PM Total','Gross Sales','Store Expenses','Kaimono Expenses','Total Expenses','Net Sales','Net Cash Deposit','Cashiers'], 'Head'),
+   ...transactions.map(t => excelRow([fmtTimestamp(t.timestamp),t.action,t.date,[roundMoney(t.amTotal),'Number','Money'],[roundMoney(t.pmTotal),'Number','Money'],[roundMoney(t.grand),'Number','Money'],[roundMoney(t.storeExpenses),'Number','Money'],[roundMoney(t.kaimonoExpenses),'Number','Money'],[roundMoney(t.totalExpenses),'Number','Money'],[roundMoney(t.net),'Number','Money'],[roundMoney(t.netCashDeposit||0),'Number','Money'],t.cashiers]))
+ ])}
+</Workbook>`;
+  const stamp = new Date().toISOString().slice(0,10);
+  downloadTextFile(`kagaribi_excel_report_${stamp}.xls`, 'application/vnd.ms-excel;charset=utf-8', workbook);
+  if(source !== 'restore') toast('📥','Excel report downloaded!');
+}
+
+//  Export CSV 
+function exportCSV(){
+  if(!records.length){ toast('⚠️','No records to export.','warn'); return; }
+  const s = appSettings;
+  const hdr=['Date',`${s.amPill} ${s.payment1}`,`${s.amPill} ${s.payment2}`,`${s.amPill} ${s.payment3}`,`${s.amPill} Total`,`${s.amPill} Tables`,`${s.amPill} Guests`,`${s.amPill} SC`,`${s.amPill} Cashier`,
+             `${s.pmPill} ${s.payment1}`,`${s.pmPill} ${s.payment2}`,`${s.pmPill} ${s.payment3}`,`${s.pmPill} Total`,`${s.pmPill} Tables`,`${s.pmPill} Guests`,`${s.pmPill} SC`,`${s.pmPill} Cashier`,s.grandLabel,s.storeExpenseLabel,s.kaimonoExpenseLabel,s.totalExpensesLabel,s.netSalesLabel,'Net Cash Deposit'];
+  const rows=records.map(r=>[r.date,r.am.cash,r.am.card,r.am.gcash,r.am.total.toFixed(2),r.am.tables,r.am.guests,r.am.sc.toFixed(2),r.am.cashier,
+    r.pm.cash,r.pm.card,r.pm.gcash,r.pm.total.toFixed(2),r.pm.tables,r.pm.guests,r.pm.sc.toFixed(2),r.pm.cashier,r.grand.toFixed(2),r.expenses.store.toFixed(2),r.expenses.kaimono.toFixed(2),r.expenses.total.toFixed(2),r.net.toFixed(2),(r.netCashDeposit||0).toFixed(2)].join(','));
+  const csv=[hdr.join(','),...rows].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download=`sales_report_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📤','CSV exported!');
+}
+
+function exportTransactionsCSV(){
+  if(!transactions.length){ toast('⚠️','No transaction history to export.','warn'); return; }
+  const hdr=['Timestamp','Action','Report Date','AM Total','PM Total','Gross Sales','Store Expenses','Kaimono Expenses','Total Expenses','Net Sales','Net Cash Deposit','Cashiers'];
+  const rows=transactions.map(t=>[t.timestamp,t.action,t.date,roundMoney(t.amTotal).toFixed(2),roundMoney(t.pmTotal).toFixed(2),roundMoney(t.grand).toFixed(2),roundMoney(t.storeExpenses).toFixed(2),roundMoney(t.kaimonoExpenses).toFixed(2),roundMoney(t.totalExpenses).toFixed(2),roundMoney(t.net).toFixed(2),roundMoney(t.netCashDeposit||0).toFixed(2),`"${String(t.cashiers).replaceAll('"','""')}"`].join(','));
+  const csv=[hdr.join(','),...rows].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download=`transaction_history_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📤','Transaction history exported!');
+}
+
+//  Toast 
+let toastTmr;
+function toast(icon,msg,type=''){
+  const el=document.getElementById('toast');
+  document.getElementById('tIcon').textContent=icon;
+  document.getElementById('tMsg').textContent=msg;
+  el.className=type?`show ${type}`:'show';
+  clearTimeout(toastTmr); toastTmr=setTimeout(()=>el.className='',3200);
+}
+// ══════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='waitress') renderWaitressSummary();
+}
+
+// ══════════════════════════════════════════════
+//  CLOUD SYNC (uses artifact persistent storage)
+// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  CLOUD SYNC — JSONBin.io backend
+//  Works in any browser, no server needed.
+//  Admin sets up Bin ID + API Key once via UI.
+// ══════════════════════════════════════════════
+let cloudReady = false;
+const CLOUD_BIN_KEY  = 'sr_cloud_bin_id';
+const CLOUD_API_KEY  = 'sr_cloud_api_key';
+
+function getCloudCreds(){ return { binId: localStorage.getItem(CLOUD_BIN_KEY)||'', apiKey: localStorage.getItem(CLOUD_API_KEY)||'' }; }
+
+function setCloudStatus(state, msg){
+  const dot = document.getElementById('cloudDot');
+  const lbl = document.getElementById('cloudStatusLabel');
+  const txt = document.getElementById('cloudStatusText');
+  if(!dot) return;
+  dot.className = 'cloud-dot ' + state;
+  lbl.textContent = { synced:'Synced', syncing:'Syncing…', error:'Error', connecting:'Connecting…', offline:'Offline', setup:'Setup Required' }[state] || state;
+  if(msg) txt.textContent = msg;
+}
+
+function openCloudSetup(){
+  const { binId, apiKey } = getCloudCreds();
+  document.getElementById('cloudBinId').value  = binId;
+  document.getElementById('cloudApiKey').value = apiKey;
+  const modal = document.getElementById('cloudSetupModal');
+  modal.style.display = 'flex';
+}
+function closeCloudSetup(){ document.getElementById('cloudSetupModal').style.display='none'; }
+function saveCloudSetup(){
+  const binId  = document.getElementById('cloudBinId').value.trim();
+  const apiKey = document.getElementById('cloudApiKey').value.trim();
+  if(!binId || !apiKey){ alert('Please enter both the Bin ID and the Master Key.'); return; }
+  localStorage.setItem(CLOUD_BIN_KEY,  binId);
+  localStorage.setItem(CLOUD_API_KEY,  apiKey);
+  closeCloudSetup();
+  cloudInit();
+}
+
+async function cloudInit(){
+  const { binId, apiKey } = getCloudCreds();
+  if(!binId || !apiKey){
+    setCloudStatus('setup','Not configured — click ⚙️ Setup to enable cloud sync');
+    document.getElementById('btnCloudSync').disabled = true;
+    document.getElementById('btnCloudPull').disabled = true;
+    cloudReady = false;
+    return;
+  }
+  setCloudStatus('connecting','Testing connection to JSONBin…');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey, 'X-Bin-Meta': 'false' }
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    cloudReady = true;
+    document.getElementById('btnCloudSync').disabled = false;
+    document.getElementById('btnCloudPull').disabled = false;
+    // Auto-pull on load
+    await cloudPull(true);
+  } catch(e){
+    cloudReady = false;
+    document.getElementById('btnCloudSync').disabled = true;
+    document.getElementById('btnCloudPull').disabled = true;
+    setCloudStatus('error', `Connection failed: ${e.message} — check Bin ID & Key in ⚙️ Setup`);
+  }
+}
+
+async function cloudPush(){
+  const { binId, apiKey } = getCloudCreds();
+  if(!cloudReady || !binId || !apiKey){ toast('⚠️','Cloud not configured. Click ⚙️ Setup first.','warn'); return; }
+  const btn = document.getElementById('btnCloudSync');
+  btn.disabled = true;
+  setCloudStatus('syncing','Pushing data to cloud…');
+  try {
+    const payload = {
+      _app:'KagaribiSalesTrack', _pushed:new Date().toISOString(),
+      _version: 1,
+      records, transactions, cashiers, scRate,
+      settings: appSettings,
+      waitressNotes: waitressNotes
+    };
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': apiKey, 'X-Bin-Versioning':'false' },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const ts = new Date().toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    setCloudStatus('synced',`Last pushed: ${ts}`);
+    localStorage.setItem('sr_cloud_last_push', new Date().toISOString());
+    toast('☁️','Data pushed to cloud successfully!');
+  } catch(e){
+    setCloudStatus('error',`Push failed: ${e.message}`);
+    toast('❌',`Cloud push failed: ${e.message}`,'err');
+  }
+  btn.disabled = false;
+}
+
+async function cloudPull(silent=false){
+  const { binId, apiKey } = getCloudCreds();
+  if(!cloudReady || !binId || !apiKey){
+    if(!silent) toast('⚠️','Cloud not configured. Click ⚙️ Setup first.','warn');
+    return;
+  }
+  const btn = document.getElementById('btnCloudPull');
+  btn.disabled = true;
+  setCloudStatus('syncing','Pulling latest data from cloud…');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey, 'X-Bin-Meta': 'false' }
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Handle JSONBin wrapper: data might be inside `record` key
+    const payload = data.record || data;
+
+    if(!payload || payload._app !== 'KagaribiSalesTrack'){
+      setCloudStatus('synced','No Kagaribi data in bin yet — push your data first');
+      if(!silent) toast('ℹ️','No Kagaribi data found in this bin.','warn');
+      btn.disabled = false; return;
+    }
+
+    // Merge — never remove local history, only add new records
+    let addedRec=0, addedTx=0;
+    (payload.records||[]).forEach(nr=>{
+      if(!records.find(r=>r.id===nr.id)){ records.push(normalizeRecord(nr)); addedRec++; }
+    });
+    (payload.transactions||[]).forEach(nt=>{
+      if(!transactions.find(t=>t.id===nt.id)){ transactions.unshift(nt); addedTx++; }
+    });
+    records.sort((a,b)=>b.id-a.id);
+    _normCache = null;
+
+    // Merge waitress notes
+    if(payload.waitressNotes && typeof payload.waitressNotes==='object'){
+      Object.assign(waitressNotes, payload.waitressNotes);
+      saveWaitressNotes();
+    }
+
+    save(); saveTransactions(); stampDataVersion();
+    renderAll();
+
+    const pushed = payload._pushed || null;
+    const ts = pushed
+      ? new Date(pushed).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : 'Unknown';
+    setCloudStatus('synced',`Pulled: ${ts} · +${addedRec} records, +${addedTx} transactions merged`);
+    if(!silent) toast('⬇️',`Pulled! +${addedRec} records & +${addedTx} transactions merged.`);
+    else if(addedRec||addedTx) toast('☁️',`Cloud sync: +${addedRec} records & +${addedTx} transactions added.`);
+    else if(!silent) setCloudStatus('synced', `Up to date as of ${ts}`);
+  } catch(e){
+    setCloudStatus('error',`Pull failed: ${e.message} — check ⚙️ Setup`);
+    if(!silent) toast('❌',`Cloud pull failed: ${e.message}`,'err');
+  }
+  btn.disabled = false;
+}
+
+// ══════════════════════════════════════════════
+//  WAITRESS NOTES — persisted in localStorage
+// ══════════════════════════════════════════════
+let waitressNotes = safeJsonLoad('sr_waitress_notes', {});
+function saveWaitressNotes(){ localStorage.setItem('sr_waitress_notes', JSON.stringify(waitressNotes)); }
+function noteKey(recordId, shift){ return `${recordId}_${shift}`; }
+
+function populateWaitressCashierFilter(){
+  const sel = document.getElementById('w_cashierFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— All Cashiers —</option>';
+  cashiers.forEach(c=>{
+    const o = document.createElement('option');
+    o.value = o.textContent = c;
+    if(c===cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function clearWaitressFilters(){
+  document.getElementById('w_cashierFilter').value='';
+  document.getElementById('w_dateFrom').value='';
+  document.getElementById('w_dateTo').value='';
+  renderWaitressSummary();
+}
+
+function getWaitressRows(){
+  const filterCashier = document.getElementById('w_cashierFilter').value;
+  const filterFrom    = document.getElementById('w_dateFrom').value;
+  const filterTo      = document.getElementById('w_dateTo').value;
+  const norm = getNorm();
+  const rows = [];
+  norm.forEach(r=>{
+    ['am','pm'].forEach(shift=>{
+      const s = r[shift];
+      if(!s.cashier && s.total===0) return; // skip blank shifts
+      if(s.total===0 && !s.cashier) return;
+      const matchCashier = !filterCashier || s.cashier===filterCashier;
+      const matchFrom    = !filterFrom    || r.date >= filterFrom;
+      const matchTo      = !filterTo      || r.date <= filterTo;
+      if(matchCashier && matchFrom && matchTo){
+        rows.push({ recordId:r.id, date:r.date, shift, cashier:s.cashier, cash:s.cash, card:s.card, gcash:s.gcash, total:s.total, sc:s.sc, tables:s.tables, guests:s.guests });
+      }
+    });
+  });
+  rows.sort((a,b)=>b.date.localeCompare(a.date)||a.shift.localeCompare(b.shift));
+  return rows;
+}
+
+function renderWaitressSummary(){
+  populateWaitressCashierFilter();
+  const rows = getWaitressRows();
+  const tbody = document.getElementById('waitressBody');
+  const empty = document.getElementById('waitressEmpty');
+  // update badge
+  document.getElementById('waitressBadge').textContent = getNorm().reduce((a,r)=>{
+    if(r.am.cashier||r.am.total>0) a++;
+    if(r.pm.cashier||r.pm.total>0) a++;
+    return a;
+  },0);
+  if(!rows.length){
+    tbody.innerHTML=''; empty.style.display='block';
+    document.getElementById('ws_shifts').textContent='0';
+    document.getElementById('ws_sales').textContent='₱0';
+    document.getElementById('ws_sc').textContent='₱0';
+    document.getElementById('ws_avg').textContent='₱0';
+    return;
+  }
+  empty.style.display='none';
+  // Stats
+  const totalSales = roundMoney(rows.reduce((a,r)=>a+r.total,0));
+  const totalSc    = roundMoney(rows.reduce((a,r)=>a+r.sc,0));
+  const avgSale    = rows.length ? roundMoney(totalSales/rows.length) : 0;
+  document.getElementById('ws_shifts').textContent = rows.length;
+  document.getElementById('ws_sales').textContent  = '₱'+moneyFmt.format(totalSales);
+  document.getElementById('ws_sc').textContent     = '₱'+moneyFmt.format(totalSc);
+  document.getElementById('ws_avg').textContent    = '₱'+moneyFmt.format(avgSale);
+  // Render rows
+  const frag = document.createDocumentFragment();
+  rows.forEach(row=>{
+    const k = noteKey(row.recordId, row.shift);
+    const note = waitressNotes[k] || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:800;color:var(--text);">${fmtDate(row.date)}</td>
+      <td><span class="shift-badge ${row.shift}">${row.shift.toUpperCase()} Shift</span></td>
+      <td style="font-weight:800;">${row.cashier||'—'}</td>
+      <td>₱${pln(row.cash)}</td>
+      <td>₱${pln(row.card)}</td>
+      <td>₱${pln(row.gcash)}</td>
+      <td style="color:var(--am);font-weight:900;">₱${pln(row.total)}</td>
+      <td style="color:var(--green);font-weight:800;">₱${pln(row.sc)}</td>
+      <td>${row.tables}</td>
+      <td>${row.guests}</td>
+      <td><input class="w-note-input" type="text" maxlength="120" placeholder="Add a note…" value="${escHtml(note)}" data-key="${k}" oninput="waitressNotes[this.dataset.key]=this.value"></td>
+      <td><button class="btn-w-save" onclick="saveWaitressNote('${k}',this)">💾 Save Note</button></td>
+    `;
+    frag.appendChild(tr);
+  });
+  tbody.innerHTML=''; tbody.appendChild(frag);
+}
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function saveWaitressNote(key, btn){
+  const input = btn.closest('tr').querySelector('.w-note-input');
+  waitressNotes[key] = input.value;
+  saveWaitressNotes();
+  const orig = btn.textContent;
+  btn.textContent = '✅ Saved!';
+  btn.style.background='var(--green-light)'; btn.style.color='var(--green)';
+  setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; btn.style.color=''; }, 1800);
+  toast('💾','Note saved!');
+}
+
+function exportWaitressCSV(){
+  const rows = getWaitressRows();
+  if(!rows.length){ toast('⚠️','No shifts to export.','warn'); return; }
+  const hdr = ['Date','Shift','Cashier','Cash','Card','G-Cash','Total','Svc Charge','Tables','Guests','Notes'];
+  const data = rows.map(r=>{
+    const k = noteKey(r.recordId, r.shift);
+    return [r.date,r.shift.toUpperCase(),r.cashier,r.cash.toFixed(2),r.card.toFixed(2),r.gcash.toFixed(2),r.total.toFixed(2),r.sc.toFixed(2),r.tables,r.guests,`"${String(waitressNotes[k]||'').replaceAll('"','""')}"`].join(',');
+  });
+  const csv=[hdr.join(','),...data].join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download=`waitress_summary_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📤','Waitress summary exported!');
+}
+
+// Init cloud sync on load
+cloudInit();
+// ══════════════════════════════════════════════════════════════
+//  SUMMARY OF SALES REPORT
+//  - Syncs LIVE with Sales Entry form as you type
+//  - Also reads saved records for the selected date
+//  - All formulas use the same shiftFormula / reportFormula
+//    as the rest of the system (no separate logic)
+// ══════════════════════════════════════════════════════════════
+
+function ssrInit(){
+  const ssrEl = document.getElementById('ssrDate');
+  // Keep SSR date in sync with report date always
+  const reportEl = document.getElementById('reportDate');
+  if(ssrEl && reportEl){
+    ssrEl.value = reportEl.value || new Date().toISOString().slice(0,10);
+  }
+  renderSSR();
+}
+
+// ── Core: build the data object that drives the SSR ──────────
+// Merges LIVE form inputs (for reportDate) with saved records.
+// If the SSR date matches the current reportDate, live form
+// values are layered on top of / instead of the saved data so
+// every keystroke updates the report instantly.
+function getSSRData(dateStr){
+  const norm = getNorm();
+  const saved = norm.filter(r => r.date === dateStr);
+
+  // Start from saved totals
+  let amCash=0, amCard=0, amGcash=0, amTotal=0, amSc=0, amTables=0, amGuests=0, amCashier='';
+  let pmCash=0, pmCard=0, pmGcash=0, pmTotal=0, pmSc=0, pmTables=0, pmGuests=0, pmCashier='';
+  let storeExp=0, kaimExp=0;
+
+  saved.forEach(r => {
+    amCash   = roundMoney(amCash   + r.am.cash);
+    amCard   = roundMoney(amCard   + r.am.card);
+    amGcash  = roundMoney(amGcash  + r.am.gcash);
+    amTotal  = roundMoney(amTotal  + r.am.total);
+    amSc     = roundMoney(amSc     + r.am.sc);
+    amTables += (r.am.tables || 0);
+    amGuests += (r.am.guests || 0);
+    if(r.am.cashier) amCashier = r.am.cashier;
+
+    pmCash   = roundMoney(pmCash   + r.pm.cash);
+    pmCard   = roundMoney(pmCard   + r.pm.card);
+    pmGcash  = roundMoney(pmGcash  + r.pm.gcash);
+    pmTotal  = roundMoney(pmTotal  + r.pm.total);
+    pmSc     = roundMoney(pmSc     + r.pm.sc);
+    pmTables += (r.pm.tables || 0);
+    pmGuests += (r.pm.guests || 0);
+    if(r.pm.cashier) pmCashier = r.pm.cashier;
+
+    storeExp = roundMoney(storeExp + r.expenses.store);
+    kaimExp  = roundMoney(kaimExp  + r.expenses.kaimono);
+  });
+
+  // If SSR date == current form date, LAYER live form values on top
+  const formDate = document.getElementById('reportDate')?.value || '';
+  if(dateStr === formDate){
+    // Read live form values
+    const livAmCash  = gv('am_cash'),  livAmCard  = gv('am_card'),  livAmGcash = gv('am_gcash');
+    const livAmGuests= cleanNumber(document.getElementById('am_guests')?.value||0);
+    const livAmTables= cleanNumber(document.getElementById('am_tables')?.value||0);
+    const livAmCashierEl = document.getElementById('am_cashier');
+    const livAmCashier = livAmCashierEl ? livAmCashierEl.value : '';
+
+    const livPmCash  = gv('pm_cash'),  livPmCard  = gv('pm_card'),  livPmGcash = gv('pm_gcash');
+    const livPmGuests= cleanNumber(document.getElementById('pm_guests')?.value||0);
+    const livPmTables= cleanNumber(document.getElementById('pm_tables')?.value||0);
+    const livPmCashierEl = document.getElementById('pm_cashier');
+    const livPmCashier = livPmCashierEl ? livPmCashierEl.value : '';
+
+    const livStore   = gv('store_expenses');
+    const livKaim    = gv('kaimono_expenses');
+
+    // Use live form if ANY value has been entered in the form
+    const formHasData = livAmCash || livAmCard || livAmGcash || livPmCash || livPmCard || livPmGcash ||
+                        livStore || livKaim || livAmGuests || livPmGuests;
+
+    if(formHasData){
+      // Recalculate shifts using the same shiftFormula
+      const amF = shiftFormula(livAmCash, livAmCard, livAmGcash, livAmGuests);
+      const pmF = shiftFormula(livPmCash, livPmCard, livPmGcash, livPmGuests);
+
+      // Add live values ON TOP of any already-saved records for this date
+      amCash   = roundMoney(amCash   + livAmCash);
+      amCard   = roundMoney(amCard   + livAmCard);
+      amGcash  = roundMoney(amGcash  + livAmGcash);
+      amTotal  = roundMoney(amTotal  + amF.total);
+      amSc     = roundMoney(amSc     + amF.sc);
+      amTables += livAmTables;
+      amGuests += livAmGuests;
+      if(livAmCashier) amCashier = livAmCashier;
+
+      pmCash   = roundMoney(pmCash   + livPmCash);
+      pmCard   = roundMoney(pmCard   + livPmCard);
+      pmGcash  = roundMoney(pmGcash  + livPmGcash);
+      pmTotal  = roundMoney(pmTotal  + pmF.total);
+      pmSc     = roundMoney(pmSc     + pmF.sc);
+      pmTables += livPmTables;
+      pmGuests += livPmGuests;
+      if(livPmCashier) pmCashier = livPmCashier;
+
+      storeExp = roundMoney(storeExp + livStore);
+      kaimExp  = roundMoney(kaimExp  + livKaim);
+    }
+  }
+
+  // ── Derived totals — all using the system formulas ──
+  const totalGross = roundMoney(amTotal + pmTotal);
+
+  // Use reportFormula for consistent NCD/net/sc calculation
+  const rpt = reportFormula(
+    { cash: amCash, total: amTotal, sc: amSc },
+    { cash: pmCash, total: pmTotal, sc: pmSc },
+    { store: storeExp, kaimono: kaimExp }
+  );
+
+  const totalSc     = rpt.totalSc;
+  const totalExp    = rpt.expenses.total;
+  const netSales    = rpt.net;
+  const ncd         = rpt.netCashDeposit;
+  const totalCash   = rpt.totalCash;
+  const totalCard   = roundMoney(amCard + pmCard);
+  const totalGcash  = roundMoney(amGcash + pmGcash);
+
+  // No. of transactions = total tables across both shifts
+  const noTransact  = amTables + pmTables;
+
+  // Correct avg sale = Lunch Sales ÷ Lunch Guest Count
+  const avgSale = amGuests > 0 ? roundMoney(amTotal / amGuests) : 0;
+
+  const cashier = amCashier || pmCashier || '—';
+
+  return {
+    amCash, amCard, amGcash, amTotal, amSc, amTables, amGuests, amCashier,
+    pmCash, pmCard, pmGcash, pmTotal, pmSc, pmTables, pmGuests, pmCashier,
+    storeExp, kaimExp,
+    totalGross, totalSc, totalExp, netSales, ncd,
+    totalCash, totalCard, totalGcash,
+    noTransact, avgSale, cashier
+  };
+}
+
+function renderSSR(){
+  const dateEl = document.getElementById('ssrDate');
+  const body   = document.getElementById('ssrBody');
+  const lbl    = document.getElementById('ssrDateLabel');
+  if(!dateEl || !body) return;
+
+  // Always keep SSR date in sync with form date
+  const formDate = document.getElementById('reportDate')?.value || '';
+  if(formDate && !dateEl.value) dateEl.value = formDate;
+  const d = dateEl.value || formDate;
+  if(!d){
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-light);">Select a date above to view the report.</td></tr>';
+    return;
+  }
+
+  const dispDate = fmtDate(d);
+  const dayName  = new Date(d + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+  const isLive   = (d === formDate);
+  lbl.textContent = isLive
+    ? `🔴 LIVE — ${dayName}, ${dispDate} (updating as you type)`
+    : `Showing: ${dayName}, ${dispDate}`;
+  lbl.style.color = isLive ? 'var(--am)' : 'var(--text-light)';
+
+  const v = getSSRData(d);
+  const F = x => moneyFmt.format(x);          // money formatter
+  const Z = x => x > 0 ? '₱' + F(x) : '—';   // show — for zero
+
+  body.innerHTML = `
+    <!-- ══ ROW 1: Header ══ -->
+    <tr class="ssr-header">
+      <td colspan="3" style="font-size:14px;letter-spacing:0.5px;">📋 SUMMARY OF SALES REPORT</td>
+      <td colspan="2" style="background:#283593;text-align:center;font-weight:900;">DATE</td>
+      <td colspan="3" class="ssr-meta-val" style="background:#e8eaf6;color:#283593;font-size:13px;">${dayName}, ${dispDate}</td>
+    </tr>
+
+    <!-- ══ ROW 2: Lunch Sales + SC + Cashier ══ -->
+    <tr class="ssr-sum">
+      <td class="ssr-lbl" style="width:130px;">LUNCH SALES</td>
+      <td class="ssr-val-am">₱${F(v.amTotal)}</td>
+      <td class="ssr-lbl">SC:</td>
+      <td class="ssr-val-sc">₱${F(v.amSc)}</td>
+      <td class="ssr-meta-lbl" style="background:#1a237e!important;color:#fff!important;text-align:center;">Cashier</td>
+      <td colspan="3" class="ssr-meta-val" style="font-weight:900;font-size:13px;">${v.cashier}</td>
+    </tr>
+
+    <!-- ══ ROW 3: Dinner Sales + SC ══ -->
+    <tr class="ssr-sum">
+      <td class="ssr-lbl">DINNER SALES</td>
+      <td class="ssr-val-pm">₱${F(v.pmTotal)}</td>
+      <td class="ssr-lbl">SC:</td>
+      <td class="ssr-val-sc">₱${F(v.pmSc)}</td>
+      <td colspan="4" style="background:#fffde7;"></td>
+    </tr>
+
+    <!-- ══ ROW 4: Total Gross + Total SC ══ -->
+    <tr class="ssr-total-row">
+      <td class="ssr-lbl" style="font-size:13px;color:#1a237e;">TOTAL GROSS</td>
+      <td class="ssr-val-gross">₱${F(v.totalGross)}</td>
+      <td class="ssr-lbl">TOTAL SC:</td>
+      <td class="ssr-val-sc">₱${F(v.totalSc)}</td>
+      <td colspan="4"></td>
+    </tr>
+
+    <!-- ══ SECTION: LUNCH ══ -->
+    <tr class="ssr-section"><td colspan="8">🌅 LUNCH</td></tr>
+    <tr class="ssr-pay">
+      <td class="ssr-lbl2">Cash:</td>
+      <td class="ssr-val">${Z(v.amCash)}</td>
+      <td class="ssr-lbl2">Card:</td>
+      <td class="ssr-val">${Z(v.amCard)}</td>
+      <td class="ssr-lbl2">Gcash:</td>
+      <td class="ssr-val">${Z(v.amGcash)}</td>
+      <td class="ssr-lbl2" style="font-weight:800;">Total:</td>
+      <td class="ssr-val-am">₱${F(v.amTotal)}</td>
+    </tr>
+
+    <!-- ══ SECTION: DINNER ══ -->
+    <tr class="ssr-section"><td colspan="8">🌙 DINNER</td></tr>
+    <tr class="ssr-pay">
+      <td class="ssr-lbl2">Cash:</td>
+      <td class="ssr-val">${Z(v.pmCash)}</td>
+      <td class="ssr-lbl2">Card:</td>
+      <td class="ssr-val">${Z(v.pmCard)}</td>
+      <td class="ssr-lbl2">Gcash:</td>
+      <td class="ssr-val">${Z(v.pmGcash)}</td>
+      <td class="ssr-lbl2" style="font-weight:800;">Total:</td>
+      <td class="ssr-val-pm">₱${F(v.pmTotal)}</td>
+    </tr>
+
+    <!-- ══ SECTION: BUFFET (row kept for layout matching) ══ -->
+    <tr class="ssr-section"><td colspan="8">🍱 BUFFET</td></tr>
+    <tr class="ssr-pay">
+      <td class="ssr-lbl2">Cash:</td><td class="ssr-val" style="color:#aaa;">—</td>
+      <td class="ssr-lbl2">Card:</td><td class="ssr-val" style="color:#aaa;">—</td>
+      <td class="ssr-lbl2">Gcash:</td><td class="ssr-val" style="color:#aaa;">—</td>
+      <td class="ssr-lbl2">Total:</td><td class="ssr-val" style="color:#aaa;">—</td>
+    </tr>
+
+    <!-- ══ PAYMENT TOTALS ROW ══ -->
+    <tr class="ssr-pay-total">
+      <td class="ssr-lbl">Total Cash:</td>
+      <td class="ssr-val">₱${F(v.totalCash)}</td>
+      <td class="ssr-lbl">Total Card:</td>
+      <td class="ssr-val">₱${F(v.totalCard)}</td>
+      <td class="ssr-lbl">Total Gcash:</td>
+      <td class="ssr-val">₱${F(v.totalGcash)}</td>
+      <td class="ssr-lbl" style="color:var(--green);">Total:</td>
+      <td class="ssr-val-gross">₱${F(v.totalGross)}</td>
+    </tr>
+
+    <!-- ══ SPACER ══ -->
+    <tr><td colspan="8" style="padding:3px;background:#f8f9ff;border:none;"></td></tr>
+
+    <!-- ══ FOOTER STATS + KAGARIBI BRAND ══ -->
+    <tr class="ssr-footer">
+      <td class="ssr-lbl" style="font-size:12px;">No. Of Transactions:</td>
+      <td class="ssr-val" colspan="3">${v.noTransact}</td>
+      <td class="ssr-brand-cell" colspan="4" rowspan="5">🍣 KAGARIBI<br>JAPANESE RESTAURANT</td>
+    </tr>
+    <tr class="ssr-footer">
+      <td class="ssr-lbl" style="font-size:12px;">SC:</td>
+      <td class="ssr-val-sc" colspan="3">₱${F(v.totalSc)}</td>
+    </tr>
+    <tr class="ssr-footer">
+      <td class="ssr-lbl" style="font-size:12px;">Expenses:</td>
+      <td class="ssr-val-exp" colspan="3">₱${F(v.totalExp)}</td>
+    </tr>
+    <tr class="ssr-footer" style="background:#c8e6c9;">
+      <td class="ssr-lbl" style="color:#1565c0;font-size:13px;font-weight:900;">Net Cash Deposit:</td>
+      <td class="ssr-val-ncd" colspan="3">₱${F(v.ncd)}</td>
+    </tr>
+  `;
+}
+
+// Called from _calcNow and _updateExpenseNow to live-update the SSR
+function liveUpdateSSR(){
+  const ssrDate = document.getElementById('ssrDate')?.value || '';
+  const formDate= document.getElementById('reportDate')?.value || '';
+  // Only live-update if SSR is showing the same date as the form
+  if(ssrDate === formDate) renderSSR();
+}
+
+function exportSSRCSV(){
+  const d = document.getElementById('ssrDate')?.value;
+  if(!d){ toast('⚠️','Select a date first.','warn'); return; }
+  const v = getSSRData(d);
+  const F = x => x.toFixed(2);
+  const rows = [
+    ['Field','Value'],
+    ['Date', d],
+    ['Lunch Sales (AM Total)', F(v.amTotal)],
+    ['Lunch SC', F(v.amSc)],
+    ['Dinner Sales (PM Total)', F(v.pmTotal)],
+    ['Dinner SC', F(v.pmSc)],
+    ['Total Gross', F(v.totalGross)],
+    ['Total SC', F(v.totalSc)],
+    ['Lunch Cash', F(v.amCash)],
+    ['Lunch Card', F(v.amCard)],
+    ['Lunch GCash', F(v.amGcash)],
+    ['Dinner Cash', F(v.pmCash)],
+    ['Dinner Card', F(v.pmCard)],
+    ['Dinner GCash', F(v.pmGcash)],
+    ['Total Cash', F(v.totalCash)],
+    ['Total Card', F(v.totalCard)],
+    ['Total GCash', F(v.totalGcash)],
+    ['Store Expenses', F(v.storeExp)],
+    ['Kaimono Expenses', F(v.kaimExp)],
+    ['Total Expenses', F(v.totalExp)],
+    ['Net Sales', F(v.netSales)],
+    ['Net Cash Deposit', F(v.ncd)],
+    ['No. of Transactions (Tables)', v.noTransact],
+    ['Lunch Guests', v.amGuests],
+    ['Dinner Guests', v.pmGuests],
+    ['Avg Sale (Lunch÷Guests)', v.amGuests > 0 ? F(v.avgSale) : '—'],
+    ['Cashier', v.cashier],
+  ];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = `sales_summary_${d}.csv`;
+  a.click();
+  toast('📤','Summary exported!');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  END OF DAY SALES REPORT
+//  Exact layout matching the Kagaribi Carmona print sheet
+//  All formulas: shiftFormula / reportFormula (same as system)
+//  Avg Sale per shift = Shift Sales ÷ Shift Guests
+//  Net Sales = Gross − Expenses
+//  NCD = Total Cash − Total SC − Total Expenses
+// ══════════════════════════════════════════════════════════════════
+
+function eodInit(){
+  const el = document.getElementById('eodDate');
+  const rep = document.getElementById('reportDate');
+  if(el && rep) el.value = rep.value || new Date().toISOString().slice(0,10);
+  renderEOD();
+}
+
+function renderEOD(){
+  const dateEl = document.getElementById('eodDate');
+  const card   = document.getElementById('eodCard');
+  const lbl    = document.getElementById('eodStatusLabel');
+  if(!dateEl || !card) return;
+
+  // Sync with form date if blank
+  const formDate = document.getElementById('reportDate')?.value || '';
+  if(!dateEl.value) dateEl.value = formDate;
+  const d = dateEl.value || formDate;
+
+  if(!d){
+    card.innerHTML = '<div class="eod-card" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;font-weight:700;">Select a date above.</div>';
+    return;
+  }
+
+  const isLive = (d === formDate);
+  const dayName = new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+  const dispDate = fmtDate(d);
+
+  if(lbl){
+    lbl.textContent = isLive ? `🔴 LIVE — ${dayName}, ${dispDate}` : `Showing: ${dayName}, ${dispDate}`;
+    lbl.style.color = isLive ? 'var(--am)' : 'var(--text-light)';
+  }
+
+  // Get all data — same source as getSSRData
+  const v = getSSRData(d);
+
+  // Net per shift = Total Sales less Service Charge
+  const amNetSales = roundMoney(v.amTotal - v.amSc);
+  const pmNetSales = roundMoney(v.pmTotal - v.pmSc);
+  // Avg/Guest = Net Sales (less SC) ÷ No. of Guests  (matches form formula)
+  const amAvg = (amNetSales > 0 && v.amGuests > 0) ? roundMoney(amNetSales / v.amGuests) : null;
+  const pmAvg = (pmNetSales > 0 && v.pmGuests > 0) ? roundMoney(pmNetSales / v.pmGuests) : null;
+
+  // Buffet (always — unless buffet data added in future)
+  const bfGuests = 0, bfTotal = 0;
+  const bfAvg = null; // #DIV/0! when no buffet guests — shown as #DIV/0! to match picture
+
+  // Net Sales = Gross − Expenses
+  const netSales = v.netSales;  // from reportFormula
+
+  const F  = x => moneyFmt.format(x);
+  const Z  = x => (x && x > 0) ? '₱' + F(x) : '-';
+  const G  = x => (x !== null) ? '₱' + F(x) : '<span style="color:#c62828;font-weight:900;">#DIV/0!</span>';
+  const live = isLive ? '<span class="eod-live-badge">LIVE</span>' : '';
+
+  // Cashier: prefer AM, fallback PM
+  const cashier = v.amCashier || v.pmCashier || 'N/A';
+
+  card.innerHTML = `
+  <div class="eod-card" id="eodPrintCard">
+    <!-- ── Store Header ── -->
+    <div class="eod-card-head">
+      <div class="eod-store">KAGARIBI CARMONA${live}</div>
+      <div class="eod-subtitle">END OF DAY SALES IN</div>
+      <div class="eod-daterow">${dayName}, ${dispDate}</div>
+    </div>
+
+    <table class="eod-tbl">
+      <!-- ── AM / PM / Buffet Sales ── -->
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+      <tr>
+        <td class="eod-label">AM SALES:</td>
+        <td class="eod-value" style="color:var(--am);">${Z(amNetSales)}</td>
+      </tr>
+      <tr>
+        <td class="eod-label">PM SALES:</td>
+        <td class="eod-value" style="color:var(--pm);">${Z(pmNetSales)}</td>
+      </tr>
+      <tr>
+        <td class="eod-label">BUFFET SALES</td>
+        <td class="eod-dash">-</td>
+      </tr>
+      <tr class="eod-line"><td colspan="2"></td></tr>
+      <tr class="eod-gross">
+        <td class="eod-label" style="font-size:14px;font-weight:900;">GROSS SALES</td>
+        <td class="eod-value" style="font-size:14px;color:var(--green);">₱${F(v.totalGross)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Net Sales ── -->
+      <tr class="eod-net-row">
+        <td class="eod-label" style="color:#2e7d32;font-weight:900;">NET SALES:</td>
+        <td class="eod-value" style="color:#2e7d32;">₱${F(netSales)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Expenses ── -->
+      <tr class="eod-exp-row">
+        <td class="eod-label">EXPENSES</td>
+        <td class="eod-value">${Z(v.totalExp)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+      <tr class="eod-dline"><td colspan="2"></td></tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Payment Breakdown ── -->
+      <tr>
+        <td class="eod-label">TOTAL CASH SALES:</td>
+        <td class="eod-value">${Z(v.totalCash)}</td>
+      </tr>
+      <tr>
+        <td class="eod-label">TOTAL CARD SALES:</td>
+        <td class="eod-value">${Z(v.totalCard)}</td>
+      </tr>
+      <tr>
+        <td class="eod-label">TOTAL GCASH:</td>
+        <td class="${v.totalGcash > 0 ? 'eod-value' : 'eod-dash'}">${v.totalGcash > 0 ? '₱'+F(v.totalGcash) : '-'}</td>
+      </tr>
+      <tr class="eod-line"><td colspan="2"></td></tr>
+      <tr>
+        <td class="eod-label" style="font-weight:900;">TOTAL SALES:</td>
+        <td class="eod-value" style="color:var(--green);font-size:14px;font-weight:900;">₱${F(v.totalGross)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+      <tr class="eod-dline"><td colspan="2"></td></tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── AM Guest + Avg ── -->
+      <tr class="eod-guest-lbl">
+        <td colspan="2" style="font-weight:800;color:#000;">AM GUEST: &nbsp;<span style="font-weight:900;">${v.amGuests > 0 ? v.amGuests : '-'}</span></td>
+      </tr>
+      <tr class="eod-avg-row">
+        <td class="eod-label" style="padding-left:12px;">AVERAGE SALES:</td>
+        <td class="eod-value" style="color:#6a1b9a;">${amAvg !== null ? '₱'+F(amAvg) : '-'}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── PM Guest + Avg ── -->
+      <tr class="eod-guest-lbl">
+        <td colspan="2" style="font-weight:800;color:#000;">PM GUEST: &nbsp;<span style="font-weight:900;">${v.pmGuests > 0 ? v.pmGuests : '-'}</span></td>
+      </tr>
+      <tr class="eod-avg-row">
+        <td class="eod-label" style="padding-left:12px;">AVERAGE SALES:</td>
+        <td class="eod-value" style="color:#6a1b9a;">${pmAvg !== null ? '₱'+F(pmAvg) : '-'}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Buffet Guest + Avg ── -->
+      <tr class="eod-guest-lbl">
+        <td colspan="2" style="font-weight:800;color:#000;">BUFFET GUEST: &nbsp;<span style="font-weight:900;">-</span></td>
+      </tr>
+      <tr class="eod-avg-row">
+        <td class="eod-label" style="padding-left:12px;">AVERAGE SALES:</td>
+        <td class="eod-value"><span style="color:#c62828;font-weight:900;">#DIV/0!</span></td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+      <tr class="eod-dline"><td colspan="2"></td></tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Transaction Count + SC + Cashier ── -->
+      <tr>
+        <td class="eod-label">TRANSACTION COUNT:</td>
+        <td class="eod-value">${v.noTransact > 0 ? v.noTransact : '-'}</td>
+      </tr>
+      <tr class="eod-sc-row">
+        <td class="eod-label">SC:</td>
+        <td class="eod-value" style="color:#c2185b;">${Z(v.totalSc)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── NCD ── -->
+      <tr class="eod-ncd-row">
+        <td class="eod-label" style="color:#1565c0;font-size:14px;font-weight:900;">NET CASH DEPOSIT:</td>
+        <td class="eod-value" style="color:#1565c0;font-size:14px;font-weight:900;">${v.ncd > 0 ? '₱'+F(v.ncd) : Z(v.ncd)}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+
+      <!-- ── Cashier ── -->
+      <tr>
+        <td class="eod-label">CASHIER:</td>
+        <td class="eod-value" style="color:var(--pm);">${cashier}</td>
+      </tr>
+      <tr class="eod-gap"><td colspan="2"></td></tr>
+    </table>
+  </div>`;
+}
+
+function liveUpdateEOD(){
+  const eodDate  = document.getElementById('eodDate')?.value  || '';
+  const formDate = document.getElementById('reportDate')?.value || '';
+  if(eodDate === formDate) renderEOD();
+}
+
+function onReportDateChange(){
+  const formDate = document.getElementById('reportDate')?.value || '';
+  // Keep EOD date in sync with the form date
+  const eodEl = document.getElementById('eodDate');
+  if(eodEl) eodEl.value = formDate;
+  // Keep SSR date in sync with the form date
+  const ssrEl = document.getElementById('ssrDate');
+  if(ssrEl) ssrEl.value = formDate;
+  // Re-render both live reports for the new date
+  renderEOD();
+  renderSSR();
+}
+
+function printEOD(){
+  const el = document.getElementById('eodPrintCard');
+  if(!el){ toast('⚠️','No report to print.','warn'); return; }
+  const win = window.open('','_blank','width=420,height=700');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>EOD Sales Report</title>
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family:Arial,sans-serif; background:#fff; }
+      .eod-card { border:2px solid #333; font-family:Arial,sans-serif; font-size:13px; color:#000; width:300px; margin:20px auto; }
+      .eod-card-head { border-bottom:2px solid #333; padding:10px 14px 8px; }
+      .eod-store { font-size:14px; font-weight:900; }
+      .eod-subtitle { font-size:12px; font-weight:700; }
+      .eod-daterow { font-size:12px; font-weight:600; color:#444; }
+      .eod-tbl { width:100%; border-collapse:collapse; }
+      .eod-tbl td { padding:4px 12px; font-size:13px; vertical-align:middle; }
+      .eod-label { font-weight:700; color:#000; white-space:nowrap; width:60%; }
+      .eod-value { font-weight:800; color:#000; text-align:right; white-space:nowrap; }
+      .eod-dash  { text-align:right; color:#555; font-weight:700; }
+      .eod-gap td { padding:4px 0; }
+      .eod-line td { padding:0; border-top:1px solid #aaa; }
+      .eod-dline td { padding:0; border-top:2px solid #333; }
+      .eod-gross td { background:#fff9c4; }
+      .eod-net-row td { background:#e8f5e9; }
+      .eod-ncd-row td { background:#e3f2fd; }
+      .eod-exp-row td { background:#fff3ef; }
+      .eod-guest-lbl td { font-weight:700; color:#000; padding:5px 12px 2px; }
+      .eod-avg-row td { padding:2px 12px 5px; }
+      .eod-live-badge { display:none; }
+    </style>
+  </head><body>${el.outerHTML}</body></html>`);
+  win.document.close();
+  setTimeout(()=>{ win.print(); win.close(); }, 400);
+}
+
+function exportEODCSV(){
+  const d = document.getElementById('eodDate')?.value;
+  if(!d){ toast('⚠️','Select a date first.','warn'); return; }
+  const v = getSSRData(d);
+  const F = x => x.toFixed(2);
+  const amAvg = v.amGuests > 0 ? roundMoney(v.amTotal / v.amGuests) : 0;
+  const pmAvg = v.pmGuests > 0 ? roundMoney(v.pmTotal / v.pmGuests) : 0;
+  const dayName = new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'});
+  const rows = [
+    ['KAGARIBI CARMONA — END OF DAY SALES REPORT'],
+    ['Date', `${dayName} ${fmtDate(d)}`],
+    [],
+    ['AM SALES', F(v.amTotal)],
+    ['PM SALES', F(v.pmTotal)],
+    ['BUFFET SALES', '-'],
+    ['GROSS SALES', F(v.totalGross)],
+    [],
+    ['NET SALES', F(v.netSales)],
+    [],
+    ['EXPENSES', F(v.totalExp)],
+    [],
+    ['TOTAL CASH SALES', F(v.totalCash)],
+    ['TOTAL CARD SALES', F(v.totalCard)],
+    ['TOTAL GCASH', F(v.totalGcash)],
+    ['TOTAL SALES', F(v.totalGross)],
+    [],
+    ['AM GUEST', v.amGuests],
+    ['AM AVERAGE SALES', amAvg > 0 ? F(amAvg) : '-'],
+    ['PM GUEST', v.pmGuests],
+    ['PM AVERAGE SALES', pmAvg > 0 ? F(pmAvg) : '-'],
+    ['BUFFET GUEST', '-'],
+    ['BUFFET AVERAGE SALES', '#DIV/0!'],
+    [],
+    ['TRANSACTION COUNT', v.noTransact],
+    ['SC', F(v.totalSc)],
+    ['NET CASH DEPOSIT', F(v.ncd)],
+    ['CASHIER', v.cashier || v.amCashier || v.pmCashier || ''],
+  ];
+  const csv = rows.map(r => Array.isArray(r) ? r.join(',') : r).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = `eod_sales_${d}.csv`;
+  a.click();
+  toast('📤','EOD report exported!');
+}
+
+</script>
